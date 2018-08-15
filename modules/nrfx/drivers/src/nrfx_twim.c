@@ -440,6 +440,11 @@ __STATIC_INLINE nrfx_err_t twim_xfer(twim_control_block_t        * p_cb,
         nrf_twim_task_trigger(p_twim, start_task);
     }
 
+    if (start_task == NRF_TWIM_TASK_STARTTX && p_xfer_desc->primary_length == 0)
+    {
+        nrf_twim_task_trigger(p_twim, NRF_TWIM_TASK_STOP);
+    }
+
     if (p_cb->handler)
     {
         if (flags & NRFX_TWIM_FLAG_NO_XFER_EVT_HANDLER)
