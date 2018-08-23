@@ -386,7 +386,13 @@ static ret_code_t setup_req_class_out(app_usbd_class_inst_t const * p_inst,
                 return NRF_ERROR_NOT_SUPPORTED;
             }
 
-            return cdc_acm_req_out_datastage(p_inst, p_setup_ev);
+            ret_code_t err_code = cdc_acm_req_out_datastage(p_inst, p_setup_ev);
+            if (err_code == NRF_SUCCESS) 
+            {
+                user_event_handler(p_inst, APP_USBD_CDC_ACM_USER_EVT_SET_LINE_CODING);
+            }
+            
+            return err_code;
         }
         case APP_USBD_CDC_REQ_SET_CONTROL_LINE_STATE:
         {

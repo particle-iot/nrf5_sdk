@@ -108,6 +108,8 @@ typedef enum app_usbd_cdc_acm_user_event_e {
 
     APP_USBD_CDC_ACM_USER_EVT_PORT_OPEN,   /**< User event PORT_OPEN.  */
     APP_USBD_CDC_ACM_USER_EVT_PORT_CLOSE,  /**< User event PORT_CLOSE. */
+
+    APP_USBD_CDC_ACM_USER_EVT_SET_LINE_CODING
 } app_usbd_cdc_acm_user_event_t;
 
 /*lint -restore*/
