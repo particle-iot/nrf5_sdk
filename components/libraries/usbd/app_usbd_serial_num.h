@@ -48,7 +48,7 @@
 extern "C" {
 #endif
 
-#define SERIAL_NUMBER_STRING_SIZE (25)
+#define SERIAL_NUMBER_STRING_SIZE (24)
 
 /**
  * @defgroup app_usbd_serial_num USBD serial number generator
