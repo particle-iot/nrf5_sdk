@@ -546,9 +546,6 @@ static inline void nrf_nfct_field_event_handler(volatile nfct_field_sense_state_
         case NFC_FIELD_STATE_ON:
             if (!m_field_on)
             {
-                HAL_NFC_DEBUG_PIN_SET(HAL_NFC_HCLOCK_ON_DEBUG_PIN);  //DEBUG!
-                nrf_drv_clock_hfclk_request(&m_clock_handler_item);
-
 #ifdef HAL_NFC_NRF52840_ENGINEERING_ABC_WORKAROUND
                 /* Begin: Bugfix for FTPAN-190 */
                 if (!is_first_sample)
@@ -561,6 +558,9 @@ static inline void nrf_nfct_field_event_handler(volatile nfct_field_sense_state_
                 }
                 /* END: Bugfix for FTPAN-190 */
 #endif // HAL_NFC_NRF52840_ENGINEERING_ABC_WORKAROUND
+
+                HAL_NFC_DEBUG_PIN_SET(HAL_NFC_HCLOCK_ON_DEBUG_PIN);  //DEBUG!
+                nrf_drv_clock_hfclk_request(&m_clock_handler_item);
 
                 HAL_NFC_DEBUG_PIN_CLEAR(HAL_NFC_HCLOCK_ON_DEBUG_PIN);  //DEBUG!
             }
