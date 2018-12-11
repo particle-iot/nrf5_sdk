@@ -249,13 +249,18 @@ static void on_exchange_mtu_request_evt(nrf_ble_gatt_t * p_gatt, ble_evt_t const
                   conn_handle, client_mtu);
 
     client_mtu = MAX(client_mtu, BLE_GATT_ATT_MTU_DEFAULT);
-    p_link->att_mtu_effective = MIN(client_mtu, p_link->att_mtu_desired);
+    p_link->att_mtu_effective = MIN(client_mtu, NRF_SDH_BLE_GATT_MAX_MTU_SIZE);
     p_link->att_mtu_exchange_pending = false;
 
     NRF_LOG_DEBUG("Updating ATT MTU to %u bytes (desired: %u) on connection 0x%x.",
                   p_link->att_mtu_effective, p_link->att_mtu_desired, conn_handle);
 
-    err_code = sd_ble_gatts_exchange_mtu_reply(conn_handle, p_link->att_mtu_desired);
+    // The Server RX MTU must be equal to Client RX MTU size given in
+    // sd_ble_gattc_exchange_mtu_request if an ATT_MTU exchange has already been performed
+    // in the other direction.
+    err_code = sd_ble_gatts_exchange_mtu_reply(conn_handle,
+            p_link->att_mtu_exchange_requested ? p_link->att_mtu_desired :
+                                                 p_link->att_mtu_effective);
 
     if (err_code != NRF_SUCCESS)
     {
@@ -357,9 +362,11 @@ static void on_data_length_update_request_evt(nrf_ble_gatt_t * p_gatt, ble_evt_t
     NRF_LOG_DEBUG("Peer on connection 0x%x requested a data length of %u bytes.",
                   p_gap_evt->conn_handle, data_length_requested);
 
-    uint8_t const data_length_effective = MIN(p_link->data_length_desired, data_length_requested);
+    uint8_t const data_length_effective = MIN(NRF_SDH_BLE_GAP_DATA_LENGTH, data_length_requested);
 
     (void) data_length_update(p_gap_evt->conn_handle, data_length_effective);
+
+    (void) p_link;
 }
 #endif // !defined (S112) && !defined(S312)
 
