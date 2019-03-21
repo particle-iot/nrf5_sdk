@@ -85,6 +85,11 @@ static inline bool nrf_drv_usbd_errata_type_52840_proto1(void)
                ( ((*(uint32_t *)0xF0000FEC) & 0xF0) == 0x00 ) );
 }
 
+static inline bool nrf_drv_usbd_errata_type_52840_eng_b(void)
+{
+    return (*(uint32_t *)0x10000130UL == 0x8UL) && (*(uint32_t *)0x10000134UL >= 0x1UL);
+}
+
 /**
  * @brief Internal auxiliary function to check if the program is running on first final product of
  *        NRF52840 chip
@@ -93,9 +98,7 @@ static inline bool nrf_drv_usbd_errata_type_52840_proto1(void)
  */
 static inline bool nrf_drv_usbd_errata_type_52840_fp1(void)
 {
-    return ( nrf_drv_usbd_errata_type_52840() &&
-               ( ((*(uint32_t *)0xF0000FE8) & 0xF0) == 0x20 ) &&
-               ( ((*(uint32_t *)0xF0000FEC) & 0xF0) == 0x00 ) );
+    return nrf_drv_usbd_errata_type_52840() && nrf_drv_usbd_errata_type_52840_eng_b();
 }
 
 /**
