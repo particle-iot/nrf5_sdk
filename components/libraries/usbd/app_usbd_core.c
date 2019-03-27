@@ -89,6 +89,18 @@ NRF_LOG_MODULE_REGISTER();
 /** @brief Make USB power value */
 #define APP_USBD_POWER_MAKE(ma) (((ma) + 1) / 2)
 
+#ifndef APP_USBD_DEVICE_CLASS
+#define APP_USBD_DEVICE_CLASS 0
+#endif /* APP_USBD_DEVICE_CLASS */
+
+#ifndef APP_USBD_DEVICE_SUB_CLASS
+#define APP_USBD_DEVICE_SUB_CLASS 0
+#endif /* APP_USBD_DEVICE_SUB_CLASS */
+
+#ifndef APP_USBD_DEVICE_PROTOCOL
+#define APP_USBD_DEVICE_PROTOCOL 0
+#endif /* APP_USBD_DEVICE_PROTOCOL */
+
 /**
  @brief Default device descriptor initializer @ref app_usbd_descriptor_device_t
 * */
@@ -96,9 +108,9 @@ NRF_LOG_MODULE_REGISTER();
    .bLength = sizeof(app_usbd_descriptor_device_t),    /* descriptor size */                             \
    .bDescriptorType = APP_USBD_DESCRIPTOR_DEVICE,      /* descriptor type */                             \
    .bcdUSB = APP_USBD_BCD_VER_MAKE(2,0),               /* USB BCD version: 2.0 */                        \
-   .bDeviceClass = 0,                                  /* device class: 0 - specified by interface */    \
-   .bDeviceSubClass = 0,                               /* device subclass: 0 - specified by interface */ \
-   .bDeviceProtocol = 0,                               /* device protocol: 0 - specified by interface */ \
+   .bDeviceClass = APP_USBD_DEVICE_CLASS,              /* device class  */                               \
+   .bDeviceSubClass = APP_USBD_DEVICE_SUB_CLASS,       /* device subclass */                             \
+   .bDeviceProtocol = APP_USBD_DEVICE_PROTOCOL,        /* device protocol */                             \
    .bMaxPacketSize0 = NRF_DRV_USBD_EPSIZE,             /* endpoint size: fixed to: NRF_DRV_USBD_EPSIZE*/ \
    .idVendor = APP_USBD_VID,                           /* Vendor ID*/                                    \
    .idProduct = APP_USBD_PID,                          /* Product ID*/                                   \
