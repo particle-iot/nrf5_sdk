@@ -1,30 +1,30 @@
 /**
  * Copyright (c) 2016 - 2018, Nordic Semiconductor ASA
- * 
+ *
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form, except as embedded into a Nordic
  *    Semiconductor ASA integrated circuit in a product or a software update for
  *    such product, must reproduce the above copyright notice, this list of
  *    conditions and the following disclaimer in the documentation and/or other
  *    materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
- * 
+ *
  * 4. This software, with or without modification, must only be used with a
  *    Nordic Semiconductor ASA integrated circuit.
- * 
+ *
  * 5. Any software provided in binary form under this license must not be reverse
  *    engineered, decompiled, modified and/or disassembled.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
  * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -35,7 +35,7 @@
  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  */
 #include "sdk_common.h"
 #if NRF_MODULE_ENABLED(APP_USBD)
@@ -89,6 +89,18 @@ NRF_LOG_MODULE_REGISTER();
 /** @brief Make USB power value */
 #define APP_USBD_POWER_MAKE(ma) (((ma) + 1) / 2)
 
+#ifndef APP_USBD_DEVICE_CLASS
+#define APP_USBD_DEVICE_CLASS 0
+#endif /* APP_USBD_DEVICE_CLASS */
+
+#ifndef APP_USBD_DEVICE_SUB_CLASS
+#define APP_USBD_DEVICE_SUB_CLASS 0
+#endif /* APP_USBD_DEVICE_SUB_CLASS */
+
+#ifndef APP_USBD_DEVICE_PROTOCOL
+#define APP_USBD_DEVICE_PROTOCOL 0
+#endif /* APP_USBD_DEVICE_PROTOCOL */
+
 /**
  @brief Default device descriptor initializer @ref app_usbd_descriptor_device_t
 * */
@@ -96,9 +108,9 @@ NRF_LOG_MODULE_REGISTER();
    .bLength = sizeof(app_usbd_descriptor_device_t),    /* descriptor size */                             \
    .bDescriptorType = APP_USBD_DESCRIPTOR_DEVICE,      /* descriptor type */                             \
    .bcdUSB = APP_USBD_BCD_VER_MAKE(2,0),               /* USB BCD version: 2.0 */                        \
-   .bDeviceClass = 0,                                  /* device class: 0 - specified by interface */    \
-   .bDeviceSubClass = 0,                               /* device subclass: 0 - specified by interface */ \
-   .bDeviceProtocol = 0,                               /* device protocol: 0 - specified by interface */ \
+   .bDeviceClass = APP_USBD_DEVICE_CLASS,              /* device class  */                               \
+   .bDeviceSubClass = APP_USBD_DEVICE_SUB_CLASS,       /* device subclass */                             \
+   .bDeviceProtocol = APP_USBD_DEVICE_PROTOCOL,        /* device protocol */                             \
    .bMaxPacketSize0 = NRF_DRV_USBD_EPSIZE,             /* endpoint size: fixed to: NRF_DRV_USBD_EPSIZE*/ \
    .idVendor = APP_USBD_VID,                           /* Vendor ID*/                                    \
    .idProduct = APP_USBD_PID,                          /* Product ID*/                                   \
