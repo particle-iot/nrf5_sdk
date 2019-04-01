@@ -989,7 +989,9 @@ static inline ret_code_t app_usbd_core_setup_req_handler(app_usbd_class_inst_t c
         }
         case APP_USBD_SETUP_REQREC_INTERFACE:
         {
-            uint8_t const iface_number = setup_ev.setup.wIndex.lb;
+            // Particle workaround: forward vendor requests to a specific interface based on wValue instead of wIndex
+            bool vendor = app_usbd_setup_req_typ(setup_ev.setup.bmRequestType) == APP_USBD_SETUP_REQTYPE_VENDOR;
+            uint8_t const iface_number = !vendor ? setup_ev.setup.wIndex.lb : setup_ev.setup.wValue.lb;
             uint8_t iface_idx;
             app_usbd_class_inst_t const * p_inst_found = app_usbd_iface_find(
                 iface_number,
