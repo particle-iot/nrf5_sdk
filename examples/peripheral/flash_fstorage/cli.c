@@ -1,30 +1,30 @@
 /**
- * Copyright (c) 2017 - 2018, Nordic Semiconductor ASA
- * 
+ * Copyright (c) 2017 - 2019, Nordic Semiconductor ASA
+ *
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form, except as embedded into a Nordic
  *    Semiconductor ASA integrated circuit in a product or a software update for
  *    such product, must reproduce the above copyright notice, this list of
  *    conditions and the following disclaimer in the documentation and/or other
  *    materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
- * 
+ *
  * 4. This software, with or without modification, must only be used with a
  *    Nordic Semiconductor ASA integrated circuit.
- * 
+ *
  * 5. Any software provided in binary form under this license must not be reverse
  *    engineered, decompiled, modified and/or disassembled.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
  * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -35,7 +35,7 @@
  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  */
 
 #include <string.h>
@@ -51,39 +51,39 @@
 #include "sdk_config.h"
 
 
-#define READ_HELP   "read bytes from flash\r\n"                                                     \
+#define READ_HELP   "read bytes from flash\n"                                                     \
                     "usage: read hex|str addr len"
 
-#define READ_HEX_HELP   "read bytes from flash in HEX format\r\n"                                   \
-                        "usage: read hex addr len\r\n"                                              \
-                        "- addr: the address to read from, in HEX\r\n"                              \
+#define READ_HEX_HELP   "read bytes from flash in HEX format\n"                                   \
+                        "usage: read hex addr len\n"                                              \
+                        "- addr: the address to read from, in HEX\n"                              \
                         "- len: number of bytes to read"
 
-#define READ_STR_HELP   "read bytes from flash in ASCII format\r\n"                                 \
-                        "usage: read str addr len\r\n"                                              \
-                        "- addr: the address to read from, in HEX\r\n"                              \
+#define READ_STR_HELP   "read bytes from flash in ASCII format\n"                                 \
+                        "usage: read str addr len\n"                                              \
+                        "- addr: the address to read from, in HEX\n"                              \
                         "- len: number of bytes to read"
 
-#define WRITE_HELP  "write ASCII bytes to flash\r\n"                                                \
-                    "usage: write addr data\r\n"                                                    \
-                    "- addr: address to write to, in HEX\r\n"                                       \
+#define WRITE_HELP  "write ASCII bytes to flash\n"                                                \
+                    "usage: write addr data\n"                                                    \
+                    "- addr: address to write to, in HEX\n"                                       \
                     "- data: data to be written; use quotes for strings"
 
-#define ERASE_HELP  "erase flash pages\r\n"                                                         \
-                    "usage: erase addr pages\r\n"                                                   \
-                    "- addr: address of the page to begin erasing from, in HEX\r\n"                 \
+#define ERASE_HELP  "erase flash pages\n"                                                         \
+                    "usage: erase addr pages\n"                                                   \
+                    "- addr: address of the page to begin erasing from, in HEX\n"                 \
                     "- pages: number of pages to erase"
 
-#define FLASHAREA_HELP  "print or set the boundaries of the flash\r\n"                              \
-                        "usage: flasharea print\r\n"                                                \
+#define FLASHAREA_HELP  "print or set the boundaries of the flash\n"                              \
+                        "usage: flasharea print\n"                                                \
                         "usage: flasharea set begin end"
 
-#define FLASHAREA_PRINT_HELP    "print the boundaries of the flash\r\n"                             \
+#define FLASHAREA_PRINT_HELP    "print the boundaries of the flash\n"                             \
                                 "usage: flasharea print"
 
-#define FLASHAREA_SET_HELP  "set the boundaries of the flash\r\n"                                   \
-                            "usage: flasharea set begin end\r\n"                                    \
-                            "- begin: address of the beginning of the flash area, in HEX\r\n"       \
+#define FLASHAREA_SET_HELP  "set the boundaries of the flash\n"                                   \
+                            "usage: flasharea set begin end\n"                                    \
+                            "- begin: address of the beginning of the flash area, in HEX\n"       \
                             "- end: address of end of the flash area, in HEX"
 
 
@@ -133,8 +133,8 @@ static void cli_unknown_param_help(nrf_cli_t const * p_cli,
 {
     nrf_cli_fprintf(p_cli,
                     NRF_CLI_ERROR,
-                    "%s: unknown parameter '%s'\r\n"
-                    "Try '%s -h' for help.\r\n",
+                    "%s: unknown parameter '%s'\n"
+                    "Try '%s -h' for help.\n",
                     p_cmd,
                     p_param,
                     p_cmd);
@@ -145,8 +145,8 @@ static void cli_missing_param_help(nrf_cli_t const * p_cli, char const * p_cmd)
 {
     nrf_cli_fprintf(p_cli,
                     NRF_CLI_ERROR,
-                    "%s: missing parameter.\r\n"
-                    "Try '%s -h' for help.\r\n",
+                    "%s: missing parameter.\n"
+                    "Try '%s -h' for help.\n",
                     p_cmd,
                     p_cmd);
 }
@@ -166,7 +166,7 @@ static void fstorage_read(nrf_cli_t const * p_cli, uint32_t addr, uint32_t len, 
     rc = nrf_fstorage_read(&fstorage, addr, data, len);
     if (rc != NRF_SUCCESS)
     {
-        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "nrf_fstorage_read() returned: %s\r\n",
+        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "nrf_fstorage_read() returned: %s\n",
                         nrf_strerror_get(rc));
         return;
     }
@@ -180,12 +180,12 @@ static void fstorage_read(nrf_cli_t const * p_cli, uint32_t addr, uint32_t len, 
             {
                 nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "0x%x ", data[i]);
             }
-            nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "\r\n");
+            nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "\n");
         } break;
 
         case DATA_FMT_STR:
         {
-            nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "%s\r\n", data);
+            nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "%s\n", data);
         } break;
 
         default:
@@ -217,7 +217,7 @@ static void fstorage_write(nrf_cli_t const * p_cli, uint32_t addr, void const * 
     ret_code_t rc = nrf_fstorage_write(&fstorage, addr, p_data, len, NULL);
     if (rc != NRF_SUCCESS)
     {
-        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "nrf_fstorage_write() returned: %s\r\n",
+        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "nrf_fstorage_write() returned: %s\n",
                         nrf_strerror_get(rc));
     }
 }
@@ -228,7 +228,7 @@ static void fstorage_erase(nrf_cli_t const * p_cli, uint32_t addr, uint32_t page
     ret_code_t rc = nrf_fstorage_erase(&fstorage, addr, pages_cnt, NULL);
     if (rc != NRF_SUCCESS)
     {
-        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "nrf_fstorage_erase() returned: %s\r\n",
+        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "nrf_fstorage_erase() returned: %s\n",
                         nrf_strerror_get(rc));
     }
 }
@@ -364,7 +364,7 @@ static void flasharea_cmd_print(nrf_cli_t const * p_cli, size_t argc, char ** ar
     }
     else
     {
-        nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "begin: %x, end: %x\r\n",
+        nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "begin: %x, end: %x\n",
                         fstorage.start_addr, fstorage.end_addr);
     }
 }
@@ -385,7 +385,7 @@ static void flasharea_cmd_set(nrf_cli_t const * p_cli, size_t argc, char ** argv
         fstorage.start_addr = strtol(argv[1], NULL, 16);
         fstorage.end_addr   = strtol(argv[2], NULL, 16);
 
-        nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "begin: %x, end: %x\r\n",
+        nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "begin: %x, end: %x\n",
                         fstorage.start_addr, fstorage.end_addr);
     }
 }

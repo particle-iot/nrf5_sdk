@@ -1,30 +1,30 @@
 /**
- * Copyright (c) 2016 - 2018, Nordic Semiconductor ASA
- * 
+ * Copyright (c) 2016 - 2019, Nordic Semiconductor ASA
+ *
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form, except as embedded into a Nordic
  *    Semiconductor ASA integrated circuit in a product or a software update for
  *    such product, must reproduce the above copyright notice, this list of
  *    conditions and the following disclaimer in the documentation and/or other
  *    materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
- * 
+ *
  * 4. This software, with or without modification, must only be used with a
  *    Nordic Semiconductor ASA integrated circuit.
- * 
+ *
  * 5. Any software provided in binary form under this license must not be reverse
  *    engineered, decompiled, modified and/or disassembled.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
  * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -35,7 +35,7 @@
  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  */
 #include <string.h>
 #include "es_flash.h"
@@ -70,7 +70,7 @@ typedef struct
 } flash_access_params_t;
 
 static volatile uint32_t m_num_pending_ops;                         //!< Current number of outstanding FDS operations.
-static volatile bool     m_factory_reset;                           //!< Should factory reset be performed.
+static volatile bool     m_factory_reset_done;                      //!< Has a factory reset operation been completed.
 static uint16_t          m_conn_handle = BLE_CONN_HANDLE_INVALID;   //!< Current connection handle.
 
 
@@ -116,8 +116,12 @@ static void fds_cb(fds_evt_t const * const p_evt)
         case FDS_EVT_INIT:
             m_num_pending_ops = 0;
             break;
-
         case FDS_EVT_DEL_FILE:
+            if (p_evt->del.file_id == FILE_ID_ES_FLASH)
+            {
+                m_factory_reset_done = true;
+            }
+            // Fall through
         case FDS_EVT_DEL_RECORD:
             // Schedule garbage collection
             err_code = app_sched_event_put(NULL, 0, fds_gc_event);
@@ -125,15 +129,27 @@ static void fds_cb(fds_evt_t const * const p_evt)
             break;
 
         case FDS_EVT_GC:
-            if (m_factory_reset && m_conn_handle != BLE_CONN_HANDLE_INVALID)
+            // During factory reset, a file is deleted, and garbage collection is scheduled
+            // when the callback for that deletion is invoked.
+            // So here we know that the factory reset is completed.
+            if (m_factory_reset_done)
             {
-                err_code =
-                    sd_ble_gap_disconnect(m_conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
-                APP_ERROR_CHECK(err_code);
+                if (m_conn_handle != BLE_CONN_HANDLE_INVALID)
+                {
+                    err_code =
+                        sd_ble_gap_disconnect(m_conn_handle, 
+                                              BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
+                    APP_ERROR_CHECK(err_code);
+                }
+                else
+                {
+                    m_factory_reset_done = false;
+                    (void)sd_nvic_SystemReset();
+                }
             }
-
-        // Fall through:
+            // Fall through:
         case FDS_EVT_UPDATE:
+            // Fall through:
         case FDS_EVT_WRITE:
             if (m_num_pending_ops > 0)
             {
@@ -288,8 +304,6 @@ ret_code_t es_flash_factory_reset(void)
     // Delete everything except the lock key:
     ret_code_t ret_code = fds_file_delete(FILE_ID_ES_FLASH);
 
-    if (ret_code == FDS_SUCCESS)
-        m_factory_reset = true;
     return ret_code;
 }
 
@@ -310,8 +324,9 @@ void es_flash_on_ble_evt(ble_evt_t const * p_evt)
 
         case BLE_GAP_EVT_DISCONNECTED:
             m_conn_handle = BLE_CONN_HANDLE_INVALID;
-            if (m_factory_reset)
+            if (m_factory_reset_done)
             {
+                m_factory_reset_done = false;
                 (void)sd_nvic_SystemReset();
             }
             break;
@@ -327,7 +342,7 @@ ret_code_t es_flash_init(void)
 
     m_conn_handle = BLE_CONN_HANDLE_INVALID;
 
-    m_factory_reset = false;
+    m_factory_reset_done = false;
 
     err_code = fds_register(fds_cb);
     RETURN_IF_ERROR(err_code);

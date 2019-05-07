@@ -1,30 +1,30 @@
 /**
- * Copyright (c) 2016 - 2018, Nordic Semiconductor ASA
- * 
+ * Copyright (c) 2016 - 2019, Nordic Semiconductor ASA
+ *
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form, except as embedded into a Nordic
  *    Semiconductor ASA integrated circuit in a product or a software update for
  *    such product, must reproduce the above copyright notice, this list of
  *    conditions and the following disclaimer in the documentation and/or other
  *    materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
- * 
+ *
  * 4. This software, with or without modification, must only be used with a
  *    Nordic Semiconductor ASA integrated circuit.
- * 
+ *
  * 5. Any software provided in binary form under this license must not be reverse
  *    engineered, decompiled, modified and/or disassembled.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
  * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -35,7 +35,7 @@
  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  */
 #include <stdint.h>
 #include <stdbool.h>
@@ -67,6 +67,9 @@ NRF_LOG_MODULE_REGISTER();
 
 #define NRF_DFU_PROTOCOL_VERSION    (0x01)
 
+#ifndef NRF_DFU_PROTOCOL_REDUCED
+#define NRF_DFU_PROTOCOL_REDUCED 0
+#endif
 
 STATIC_ASSERT(DFU_SIGNED_COMMAND_SIZE <= INIT_COMMAND_MAX_SIZE);
 
@@ -101,6 +104,7 @@ static nrf_dfu_result_t ext_err_code_handle(nrf_dfu_result_t ret_val)
 }
 
 
+#if !NRF_DFU_PROTOCOL_REDUCED
 static void on_protocol_version_request(nrf_dfu_request_t const * p_req, nrf_dfu_response_t * p_res)
 {
     UNUSED_PARAMETER(p_req);
@@ -209,6 +213,7 @@ static void on_mtu_get_request(nrf_dfu_request_t * p_req, nrf_dfu_response_t * p
     NRF_LOG_DEBUG("Handle NRF_DFU_OP_MTU_GET");
     p_res->mtu.size = p_req->mtu.size;
 }
+#endif // !NRF_DFU_PROTOCOL_REDUCED
 
 
 static void on_prn_set_request(nrf_dfu_request_t * p_req, nrf_dfu_response_t * p_res)
@@ -303,7 +308,7 @@ static void on_cmd_obj_execute_request(nrf_dfu_request_t const * p_req, nrf_dfu_
 
     if (p_res->result == NRF_DFU_RES_CODE_SUCCESS)
     {
-        if (nrf_dfu_settings_write(NULL) == NRF_SUCCESS)
+        if (nrf_dfu_settings_write_and_backup(NULL) == NRF_SUCCESS)
         {
             /* Setting DFU to initialized */
             NRF_LOG_DEBUG("Writing valid init command to flash.");
@@ -482,6 +487,11 @@ static void on_data_obj_write_request(nrf_dfu_request_t * p_req, nrf_dfu_respons
     }
 
     uint32_t const write_addr = m_firmware_start_addr + s_dfu_settings.write_offset;
+    /* CRC must be calculated before handing off the data to fstorage because the data is
+     * freed on write completion.
+     */
+    uint32_t const next_crc =
+        crc32_compute(p_req->write.p_data, p_req->write.len, &s_dfu_settings.progress.firmware_image_crc);
 
     ASSERT(p_req->callback.write);
 
@@ -501,8 +511,7 @@ static void on_data_obj_write_request(nrf_dfu_request_t * p_req, nrf_dfu_respons
     /* Update the CRC of the firmware image. */
     s_dfu_settings.write_offset                   += p_req->write.len;
     s_dfu_settings.progress.firmware_image_offset += p_req->write.len;
-    s_dfu_settings.progress.firmware_image_crc     =
-        crc32_compute(p_req->write.p_data, p_req->write.len, &s_dfu_settings.progress.firmware_image_crc);
+    s_dfu_settings.progress.firmware_image_crc     = next_crc;
 
     /* This is only used when the PRN is triggered and the 'write' message
      * is answered with a CRC message and these field are copied into the response.
@@ -528,14 +537,13 @@ static void on_data_obj_execute_request_sched(void * p_evt, uint16_t event_lengt
 {
     UNUSED_PARAMETER(event_length);
 
+    ret_code_t          ret;
     nrf_dfu_request_t * p_req = (nrf_dfu_request_t *)(p_evt);
 
     /* Wait for all buffers to be written in flash. */
     if (nrf_fstorage_is_busy(NULL))
     {
-        ret_code_t ret = app_sched_event_put(p_req,
-                                             sizeof(nrf_dfu_request_t),
-                                             on_data_obj_execute_request_sched);
+        ret = app_sched_event_put(p_req, sizeof(nrf_dfu_request_t), on_data_obj_execute_request_sched);
         if (ret != NRF_SUCCESS)
         {
             NRF_LOG_ERROR("Failed to schedule object execute: 0x%x.", ret);
@@ -548,36 +556,37 @@ static void on_data_obj_execute_request_sched(void * p_evt, uint16_t event_lengt
         .request = NRF_DFU_OP_OBJECT_EXECUTE,
     };
 
-    nrf_dfu_flash_callback_t dfu_settings_callback;
-
-    /* Whole firmware image was received, validate it. */
     if (s_dfu_settings.progress.firmware_image_offset == m_firmware_size_req)
     {
-        NRF_LOG_DEBUG("Postvalidation of firmware image.");
+        NRF_LOG_DEBUG("Whole firmware image received. Postvalidating.");
 
+        #if NRF_DFU_IN_APP
         res.result = nrf_dfu_validation_post_data_execute(m_firmware_start_addr, m_firmware_size_req);
+        #else
+        res.result = nrf_dfu_validation_activation_prepare(m_firmware_start_addr, m_firmware_size_req);
+        #endif
+
         res.result = ext_err_code_handle(res.result);
 
-        /* Callback to on_dfu_complete() after updating the settings. */
-        dfu_settings_callback = (nrf_dfu_flash_callback_t)(on_dfu_complete);
+        /* Provide response to transport */
+        p_req->callback.response(&res, p_req->p_context);
+
+        ret = nrf_dfu_settings_write_and_backup((nrf_dfu_flash_callback_t)on_dfu_complete);
+        UNUSED_RETURN_VALUE(ret);
     }
     else
     {
         res.result = NRF_DFU_RES_CODE_SUCCESS;
-        /* No callback required. */
-        dfu_settings_callback = NULL;
-    }
 
-    /* Provide response to transport */
-    p_req->callback.response(&res, p_req->p_context);
+        /* Provide response to transport */
+        p_req->callback.response(&res, p_req->p_context);
 
-    /* Store settings to flash if the whole image was received or if configured
-     * to save progress information in flash.
-     */
-    if ((dfu_settings_callback != NULL) || NRF_DFU_SAVE_PROGRESS_IN_FLASH)
-    {
-        ret_code_t ret = nrf_dfu_settings_write(dfu_settings_callback);
-        UNUSED_RETURN_VALUE(ret);
+        if (NRF_DFU_SAVE_PROGRESS_IN_FLASH)
+        {
+            /* Allowing skipping settings backup to save time and flash wear. */
+            ret = nrf_dfu_settings_write_and_backup(NULL);
+            UNUSED_RETURN_VALUE(ret);
+        }
     }
 
     NRF_LOG_DEBUG("Request handling complete. Result: 0x%x", res.result);
@@ -721,6 +730,7 @@ static void nrf_dfu_req_handler_req_process(nrf_dfu_request_t * p_req)
 
     switch (p_req->request)
     {
+#if !NRF_DFU_PROTOCOL_REDUCED
         case NRF_DFU_OP_PROTOCOL_VERSION:
         {
             on_protocol_version_request(p_req, &response);
@@ -741,14 +751,14 @@ static void nrf_dfu_req_handler_req_process(nrf_dfu_request_t * p_req)
             on_ping_request(p_req, &response);
         } break;
 
-        case NRF_DFU_OP_RECEIPT_NOTIF_SET:
-        {
-            on_prn_set_request(p_req, &response);
-        } break;
-
         case NRF_DFU_OP_MTU_GET:
         {
             on_mtu_get_request(p_req, &response);
+        } break;
+#endif
+        case NRF_DFU_OP_RECEIPT_NOTIF_SET:
+        {
+            on_prn_set_request(p_req, &response);
         } break;
 
         case NRF_DFU_OP_ABORT:
@@ -823,7 +833,7 @@ ret_code_t nrf_dfu_req_handler_init(nrf_dfu_observer_t observer)
         return NRF_ERROR_INVALID_PARAM;
     }
 
-#ifdef BLE_STACK_SUPPORT_REQD
+#if defined(BLE_STACK_SUPPORT_REQD) || defined(ANT_STACK_SUPPORT_REQD)
     ret_val  = nrf_dfu_flash_init(true);
 #else
     ret_val = nrf_dfu_flash_init(false);

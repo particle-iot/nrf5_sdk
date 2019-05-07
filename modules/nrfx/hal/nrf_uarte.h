@@ -1,30 +1,30 @@
 /**
- * Copyright (c) 2015 - 2018, Nordic Semiconductor ASA
- * 
+ * Copyright (c) 2015 - 2019, Nordic Semiconductor ASA
+ *
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form, except as embedded into a Nordic
  *    Semiconductor ASA integrated circuit in a product or a software update for
  *    such product, must reproduce the above copyright notice, this list of
  *    conditions and the following disclaimer in the documentation and/or other
  *    materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
- * 
+ *
  * 4. This software, with or without modification, must only be used with a
  *    Nordic Semiconductor ASA integrated circuit.
- * 
+ *
  * 5. Any software provided in binary form under this license must not be reverse
  *    engineered, decompiled, modified and/or disassembled.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
  * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -35,7 +35,7 @@
  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  */
 
 #ifndef NRF_UARTE_H__
@@ -82,7 +82,7 @@ typedef enum
     NRF_UARTE_EVENT_NCTS      = offsetof(NRF_UARTE_Type, EVENTS_NCTS),      ///< CTS is deactivated.
     NRF_UARTE_EVENT_RXDRDY    = offsetof(NRF_UARTE_Type, EVENTS_RXDRDY),    ///< Data received in RXD (but potentially not yet transferred to Data RAM).
     NRF_UARTE_EVENT_ENDRX     = offsetof(NRF_UARTE_Type, EVENTS_ENDRX),     ///< Receive buffer is filled up.
-    NRF_UARTE_EVENT_TXDDY     = offsetof(NRF_UARTE_Type, EVENTS_TXDRDY),    ///< Data sent from TXD.
+    NRF_UARTE_EVENT_TXDRDY    = offsetof(NRF_UARTE_Type, EVENTS_TXDRDY),    ///< Data sent from TXD.
     NRF_UARTE_EVENT_ENDTX     = offsetof(NRF_UARTE_Type, EVENTS_ENDTX),     ///< Last TX byte transmitted.
     NRF_UARTE_EVENT_ERROR     = offsetof(NRF_UARTE_Type, EVENTS_ERROR),     ///< Error detected.
     NRF_UARTE_EVENT_RXTO      = offsetof(NRF_UARTE_Type, EVENTS_RXTO),      ///< Receiver timeout.
@@ -251,6 +251,52 @@ __STATIC_INLINE bool nrf_uarte_int_enable_check(NRF_UARTE_Type * p_reg, nrf_uart
  * @param int_mask Interrupts to disable.
  */
 __STATIC_INLINE void nrf_uarte_int_disable(NRF_UARTE_Type * p_reg, uint32_t int_mask);
+
+#if defined(DPPI_PRESENT) || defined(__NRFX_DOXYGEN__)
+/**
+ * @brief Function for setting the subscribe configuration for a given
+ *        UARTE task.
+ *
+ * @param[in] p_reg   Pointer to the structure of registers of the peripheral.
+ * @param[in] task    Task for which to set the configuration.
+ * @param[in] channel Channel through which to subscribe events.
+ */
+__STATIC_INLINE void nrf_uarte_subscribe_set(NRF_UARTE_Type * p_reg,
+                                             nrf_uarte_task_t task,
+                                             uint8_t          channel);
+
+/**
+ * @brief Function for clearing the subscribe configuration for a given
+ *        UARTE task.
+ *
+ * @param[in] p_reg Pointer to the structure of registers of the peripheral.
+ * @param[in] task  Task for which to clear the configuration.
+ */
+__STATIC_INLINE void nrf_uarte_subscribe_clear(NRF_UARTE_Type * p_reg,
+                                               nrf_uarte_task_t task);
+
+/**
+ * @brief Function for setting the publish configuration for a given
+ *        UARTE event.
+ *
+ * @param[in] p_reg   Pointer to the structure of registers of the peripheral.
+ * @param[in] event   Event for which to set the configuration.
+ * @param[in] channel Channel through which to publish the event.
+ */
+__STATIC_INLINE void nrf_uarte_publish_set(NRF_UARTE_Type *  p_reg,
+                                           nrf_uarte_event_t event,
+                                           uint8_t           channel);
+
+/**
+ * @brief Function for clearing the publish configuration for a given
+ *        UARTE event.
+ *
+ * @param[in] p_reg Pointer to the structure of registers of the peripheral.
+ * @param[in] event Event for which to clear the configuration.
+ */
+__STATIC_INLINE void nrf_uarte_publish_clear(NRF_UARTE_Type *  p_reg,
+                                             nrf_uarte_event_t event);
+#endif // defined(DPPI_PRESENT) || defined(__NRFX_DOXYGEN__)
 
 /**
  * @brief Function for getting error source mask. Function is clearing error source flags after reading.
@@ -461,6 +507,36 @@ __STATIC_INLINE void nrf_uarte_int_disable(NRF_UARTE_Type * p_reg, uint32_t int_
 {
     p_reg->INTENCLR = int_mask;
 }
+
+#if defined(DPPI_PRESENT)
+__STATIC_INLINE void nrf_uarte_subscribe_set(NRF_UARTE_Type * p_reg,
+                                             nrf_uarte_task_t task,
+                                             uint8_t          channel)
+{
+    *((volatile uint32_t *) ((uint8_t *) p_reg + (uint32_t) task + 0x80uL)) =
+            ((uint32_t)channel | UARTE_SUBSCRIBE_STARTRX_EN_Msk);
+}
+
+__STATIC_INLINE void nrf_uarte_subscribe_clear(NRF_UARTE_Type * p_reg,
+                                               nrf_uarte_task_t task)
+{
+    *((volatile uint32_t *) ((uint8_t *) p_reg + (uint32_t) task + 0x80uL)) = 0;
+}
+
+__STATIC_INLINE void nrf_uarte_publish_set(NRF_UARTE_Type *  p_reg,
+                                           nrf_uarte_event_t event,
+                                           uint8_t           channel)
+{
+    *((volatile uint32_t *) ((uint8_t *) p_reg + (uint32_t) event + 0x80uL)) =
+            ((uint32_t)channel | UARTE_PUBLISH_CTS_EN_Msk);
+}
+
+__STATIC_INLINE void nrf_uarte_publish_clear(NRF_UARTE_Type *  p_reg,
+                                             nrf_uarte_event_t event)
+{
+    *((volatile uint32_t *) ((uint8_t *) p_reg + (uint32_t) event + 0x80uL)) = 0;
+}
+#endif // defined(DPPI_PRESENT)
 
 __STATIC_INLINE uint32_t nrf_uarte_errorsrc_get_and_clear(NRF_UARTE_Type * p_reg)
 {

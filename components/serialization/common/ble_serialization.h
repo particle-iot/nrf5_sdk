@@ -1,30 +1,30 @@
 /**
- * Copyright (c) 2013 - 2018, Nordic Semiconductor ASA
- * 
+ * Copyright (c) 2013 - 2019, Nordic Semiconductor ASA
+ *
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form, except as embedded into a Nordic
  *    Semiconductor ASA integrated circuit in a product or a software update for
  *    such product, must reproduce the above copyright notice, this list of
  *    conditions and the following disclaimer in the documentation and/or other
  *    materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
- * 
+ *
  * 4. This software, with or without modification, must only be used with a
  *    Nordic Semiconductor ASA integrated circuit.
- * 
+ *
  * 5. Any software provided in binary form under this license must not be reverse
  *    engineered, decompiled, modified and/or disassembled.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
  * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -35,7 +35,7 @@
  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  */
 #ifndef BLE_SERIALIZATION_H__
 #define BLE_SERIALIZATION_H__
@@ -58,7 +58,7 @@ typedef enum
     SER_PKT_TYPE_EVT,         /**< Event packet type. */
     SER_PKT_TYPE_DTM_CMD,     /**< DTM Command packet type. */
     SER_PKT_TYPE_DTM_RESP,    /**< DTM Response packet type. */
-    SER_PKT_TYPE_RESET_CMD,   /**< System Reset Command packet type. */
+    SER_PKT_TYPE_GENERIC_CMD, /**< GENERIC Command packet type. */
 #if defined(ANT_STACK_SUPPORT_REQD)
     SER_PKT_TYPE_ANT_CMD,     /**< ANT Command packet type. */
     SER_PKT_TYPE_ANT_RESP,    /**< ANT Response packet type. */
@@ -66,6 +66,12 @@ typedef enum
 #endif
     SER_PKT_TYPE_MAX          /**< Upper bound. */
 } ser_pkt_type_t;
+
+typedef enum
+{
+    SER_GENERIC_CMD_RESET,
+    SER_GENERIC_CMD_SOFT_RESET
+} ser_generic_cmd_t;
 
 #define  LOW16(a) ((uint16_t)((a & 0x0000FFFF) >> 0))
 #define HIGH16(a) ((uint16_t)((a & 0xFFFF0000) >> 16))

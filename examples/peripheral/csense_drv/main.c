@@ -1,30 +1,30 @@
 /**
- * Copyright (c) 2015 - 2018, Nordic Semiconductor ASA
- * 
+ * Copyright (c) 2015 - 2019, Nordic Semiconductor ASA
+ *
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form, except as embedded into a Nordic
  *    Semiconductor ASA integrated circuit in a product or a software update for
  *    such product, must reproduce the above copyright notice, this list of
  *    conditions and the following disclaimer in the documentation and/or other
  *    materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
- * 
+ *
  * 4. This software, with or without modification, must only be used with a
  *    Nordic Semiconductor ASA integrated circuit.
- * 
+ *
  * 5. Any software provided in binary form under this license must not be reverse
  *    engineered, decompiled, modified and/or disassembled.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
  * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -35,7 +35,7 @@
  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  */
 /** @file
  * @defgroup nrf_drv_csense_example_main main.c
@@ -277,7 +277,7 @@ static void configuration(void)
             /* do nothing */
             break;
         case CSD_STATE_START_CONFIG:
-            NRF_LOG_RAW_INFO("[STEP: %d] Touch both pads.\r\n", CSD_STATE_START_CONFIG);
+            NRF_LOG_RAW_INFO("[STEP: %d] Touch both pads.\n", CSD_STATE_START_CONFIG);
             for (int i = 0; i < 2; i++)
             {
                 max_value[i] = 0;
@@ -289,7 +289,7 @@ static void configuration(void)
         case CSD_STATE_WAIT_TOUCH:
             if (m_wait_timer == 0)
             {
-                NRF_LOG_RAW_INFO("[STEP: %d] Measurement started: wait 3s\r\n",
+                NRF_LOG_RAW_INFO("[STEP: %d] Measurement started: wait 3s\n",
                                  CSD_STATE_WAIT_TOUCH);
                 m_wait_timer = 30;   // measure pads for 3 seconds
                 CSD_NEXT_STATE(CSD_STATE_TOUCH);
@@ -303,13 +303,13 @@ static void configuration(void)
                 err_code = nrf_drv_csense_sample();
                 if (err_code != NRF_SUCCESS)
                 {
-                    NRF_LOG_RAW_INFO("Sensor Busy - configuration terminated.\r\n");
+                    NRF_LOG_RAW_INFO("Sensor Busy - configuration terminated.\n");
                     CSD_NEXT_STATE(CSD_STATE_IDLE);
                     return;
                 }
                 while (nrf_drv_csense_is_busy());
-                NRF_LOG_RAW_INFO("-> measurement finished OK.\r\n");
-                NRF_LOG_RAW_INFO("[STEP: %d] Release both pads.\r\n", CSD_STATE_TOUCH);
+                NRF_LOG_RAW_INFO("-> measurement finished OK.\n");
+                NRF_LOG_RAW_INFO("[STEP: %d] Release both pads.\n", CSD_STATE_TOUCH);
                 m_wait_timer = 15;  // wait 1,5 s
                 break;
             }
@@ -317,7 +317,7 @@ static void configuration(void)
         case CSD_STATE_WAIT_RELEASE:
             if (m_wait_timer == 0)
             {
-                NRF_LOG_RAW_INFO("[STEP: %d] Measurement started: wait 3s\r\n",
+                NRF_LOG_RAW_INFO("[STEP: %d] Measurement started: wait 3s\n",
                                  CSD_STATE_WAIT_RELEASE);
                 CSD_NEXT_STATE(CSD_STATE_RELEASE);
                 m_wait_timer = 30;  // wait 1 s
@@ -330,11 +330,11 @@ static void configuration(void)
                 err_code = nrf_drv_csense_sample();
                 if (err_code != NRF_SUCCESS)
                 {
-                    NRF_LOG_RAW_INFO("Sensor Busy - configuration terminated.\r\n");
+                    NRF_LOG_RAW_INFO("Sensor Busy - configuration terminated.\n");
                     return;
                 }
                 while (nrf_drv_csense_is_busy());
-                NRF_LOG_RAW_INFO("-> measurement finished OK.\r\n");
+                NRF_LOG_RAW_INFO("-> measurement finished OK.\n");
                 new_th_pad_1 = max_value[PAD_ID_0];
                 new_th_pad_1 += min_value[PAD_ID_0];
                 new_th_pad_1 /= 2;
@@ -344,8 +344,8 @@ static void configuration(void)
                 threshold_value_pad1 = new_th_pad_1;
                 threshold_value_pad2 = new_th_pad_2;
 
-                NRF_LOG_RAW_INFO("\r\nNew thresholds:\r\n\tAIN1 = %d\r\n\tAIN7 = %d"
-                                 "\r\nModule ready.\r\n",
+                NRF_LOG_RAW_INFO("\nNew thresholds:\n\tAIN1 = %d\n\tAIN7 = %d"
+                                 "\nModule ready.\n",
                                  (unsigned int)new_th_pad_1,
                                  (unsigned int)new_th_pad_2);
                 break;
@@ -384,10 +384,10 @@ int main(void)
     err_code = nrf_cli_start(&m_cli_uart);
     APP_ERROR_CHECK(err_code);
 
-    NRF_LOG_RAW_INFO("Capacitive sensing driver example started. \r\n");
+    NRF_LOG_RAW_INFO("Capacitive sensing driver example started. \n");
     csense_initialize();
-    NRF_LOG_RAW_INFO("Please execute: \"configure\" command to set thresholds.\r\n"
-                     "In order to see all available commands please press the Tab button.\r\n");
+    NRF_LOG_RAW_INFO("Please execute: \"configure\" command to set thresholds.\n"
+                     "In order to see all available commands please press the Tab button.\n");
 
     start_app_timer();
 
@@ -404,13 +404,13 @@ static void configure_thresholds(nrf_cli_t const * p_cli, size_t argc, char **ar
 {
     if (argc > 1)
     {
-        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s: too many parameters\r\n", argv[0]);
+        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s: too many parameters\n", argv[0]);
         return;
     }
 
     if (m_state != CSD_STATE_IDLE)
     {
-        nrf_cli_fprintf(p_cli, NRF_CLI_WARNING, "configuration already ongoing\r\n");
+        nrf_cli_fprintf(p_cli, NRF_CLI_WARNING, "configuration already ongoing\n");
     }
     else
     {

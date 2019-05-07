@@ -1,30 +1,30 @@
 /**
- * Copyright (c) 2018 - 2018, Nordic Semiconductor ASA
- * 
+ * Copyright (c) 2018 - 2019, Nordic Semiconductor ASA
+ *
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form, except as embedded into a Nordic
  *    Semiconductor ASA integrated circuit in a product or a software update for
  *    such product, must reproduce the above copyright notice, this list of
  *    conditions and the following disclaimer in the documentation and/or other
  *    materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
- * 
+ *
  * 4. This software, with or without modification, must only be used with a
  *    Nordic Semiconductor ASA integrated circuit.
- * 
+ *
  * 5. Any software provided in binary form under this license must not be reverse
  *    engineered, decompiled, modified and/or disassembled.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
  * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -35,7 +35,7 @@
  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  */
 #include <stdio.h>
 #include <stdbool.h>
@@ -95,7 +95,7 @@ static void timer_handle(void * p_context)
     if (m_counter_active)
     {
         m_counter++;
-        NRF_LOG_RAW_INFO("counter = %d\r\n", m_counter);
+        NRF_LOG_RAW_INFO("counter = %d\n", m_counter);
     }
 }
 
@@ -156,8 +156,8 @@ int main(void)
 
     cli_start();
 
-    NRF_LOG_RAW_INFO("Command Line Interface example started.\r\n");
-    NRF_LOG_RAW_INFO("Please press the Tab key to see all available commands.\r\n");
+    NRF_LOG_RAW_INFO("Command Line Interface example started.\n");
+    NRF_LOG_RAW_INFO("Please press the Tab key to see all available commands.\n");
 
     while (true)
     {
@@ -171,7 +171,7 @@ static void cmd_print_param(nrf_cli_t const * p_cli, size_t argc, char **argv)
 {
     for (size_t i = 1; i < argc; i++)
     {
-        nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "argv[%d] = %s\r\n", i, argv[i]);
+        nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "argv[%d] = %s\n", i, argv[i]);
     }
 }
 
@@ -181,7 +181,7 @@ static void cmd_print_all(nrf_cli_t const * p_cli, size_t argc, char **argv)
     {
         nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "%s ", argv[i]);
     }
-    nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "\r\n");
+    nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "\n");
 }
 
 static void cmd_print(nrf_cli_t const * p_cli, size_t argc, char **argv)
@@ -197,18 +197,18 @@ static void cmd_print(nrf_cli_t const * p_cli, size_t argc, char **argv)
 
     if (argc != 2)
     {
-        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s: bad parameter count\r\n", argv[0]);
+        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s: bad parameter count\n", argv[0]);
         return;
     }
 
-    nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s: unknown parameter: %s\r\n", argv[0], argv[1]);
+    nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s: unknown parameter: %s\n", argv[0], argv[1]);
 }
 
 static void cmd_counter_start(nrf_cli_t const * p_cli, size_t argc, char **argv)
 {
     if (argc != 1)
     {
-        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s: bad parameter count\r\n", argv[0]);
+        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s: bad parameter count\n", argv[0]);
         return;
     }
 
@@ -219,7 +219,7 @@ static void cmd_counter_stop(nrf_cli_t const * p_cli, size_t argc, char **argv)
 {
     if (argc != 1)
     {
-        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s: bad parameter count\r\n", argv[0]);
+        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s: bad parameter count\n", argv[0]);
         return;
     }
 
@@ -230,7 +230,7 @@ static void cmd_counter_reset(nrf_cli_t const * p_cli, size_t argc, char **argv)
 {
     if (argc != 1)
     {
-        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s: bad parameter count\r\n", argv[0]);
+        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s: bad parameter count\n", argv[0]);
         return;
     }
 
@@ -259,18 +259,18 @@ static void cmd_counter(nrf_cli_t const * p_cli, size_t argc, char **argv)
 
     if (argc != 2)
     {
-        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s: bad parameter count\r\n", argv[0]);
+        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s: bad parameter count\n", argv[0]);
         return;
     }
 
     if (!strcmp(argv[1], "-t") || !strcmp(argv[1], "--test"))
     {
-        nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "Dummy test option.\r\n");
+        nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "Dummy test option.\n");
         return;
     }
 
     /* subcommands have their own handlers and they are not processed here */
-    nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s: unknown parameter: %s\r\n", argv[0], argv[1]);
+    nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s: unknown parameter: %s\n", argv[0], argv[1]);
 }
 
 static void cmd_nordic(nrf_cli_t const * p_cli, size_t argc, char **argv)
@@ -285,31 +285,31 @@ static void cmd_nordic(nrf_cli_t const * p_cli, size_t argc, char **argv)
     }
 
     nrf_cli_fprintf(p_cli, NRF_CLI_OPTION,
-                    "\r\n"
-                    "            .co:.                   'xo,          \r\n"
-                    "         .,collllc,.             'ckOOo::,..      \r\n"
-                    "      .:ooooollllllll:'.     .;dOOOOOOo:::;;;'.   \r\n"
-                    "   'okxddoooollllllllllll;'ckOOOOOOOOOo:::;;;,,,' \r\n"
-                    "   OOOkxdoooolllllllllllllllldxOOOOOOOo:::;;;,,,'.\r\n"
-                    "   OOOOOOkdoolllllllllllllllllllldxOOOo:::;;;,,,'.\r\n"
-                    "   OOOOOOOOOkxollllllllllllllllllcccldl:::;;;,,,'.\r\n"
-                    "   OOOOOOOOOOOOOxdollllllllllllllccccc::::;;;,,,'.\r\n"
-                    "   OOOOOOOOOOOOOOOOkxdlllllllllllccccc::::;;;,,,'.\r\n"
-                    "   kOOOOOOOOOOOOOOOOOOOkdolllllllccccc::::;;;,,,'.\r\n"
-                    "   kOOOOOOOOOOOOOOOOOOOOOOOxdllllccccc::::;;;,,,'.\r\n"
-                    "   kOOOOOOOOOOOOOOOOOOOOOOOOOOkxolcccc::::;;;,,,'.\r\n"
-                    "   kOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOkdlc::::;;;,,,'.\r\n"
-                    "   xOOOOOOOOOOOxdkOOOOOOOOOOOOOOOOOOOOxoc:;;;,,,'.\r\n"
-                    "   xOOOOOOOOOOOdc::ldkOOOOOOOOOOOOOOOOOOOkdc;,,,''\r\n"
-                    "   xOOOOOOOOOOOdc::;;,;cdkOOOOOOOOOOOOOOOOOOOxl;''\r\n"
-                    "   .lkOOOOOOOOOdc::;;,,''..;oOOOOOOOOOOOOOOOOOOOx'\r\n"
-                    "      .;oOOOOOOdc::;;,.       .:xOOOOOOOOOOOOd;.  \r\n"
-                    "          .:xOOdc:,.              'ckOOOOkl'      \r\n"
-                    "             .od'                    'xk,         \r\n"
-                    "\r\n");
+                    "\n"
+                    "            .co:.                   'xo,          \n"
+                    "         .,collllc,.             'ckOOo::,..      \n"
+                    "      .:ooooollllllll:'.     .;dOOOOOOo:::;;;'.   \n"
+                    "   'okxddoooollllllllllll;'ckOOOOOOOOOo:::;;;,,,' \n"
+                    "   OOOkxdoooolllllllllllllllldxOOOOOOOo:::;;;,,,'.\n"
+                    "   OOOOOOkdoolllllllllllllllllllldxOOOo:::;;;,,,'.\n"
+                    "   OOOOOOOOOkxollllllllllllllllllcccldl:::;;;,,,'.\n"
+                    "   OOOOOOOOOOOOOxdollllllllllllllccccc::::;;;,,,'.\n"
+                    "   OOOOOOOOOOOOOOOOkxdlllllllllllccccc::::;;;,,,'.\n"
+                    "   kOOOOOOOOOOOOOOOOOOOkdolllllllccccc::::;;;,,,'.\n"
+                    "   kOOOOOOOOOOOOOOOOOOOOOOOxdllllccccc::::;;;,,,'.\n"
+                    "   kOOOOOOOOOOOOOOOOOOOOOOOOOOkxolcccc::::;;;,,,'.\n"
+                    "   kOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOkdlc::::;;;,,,'.\n"
+                    "   xOOOOOOOOOOOxdkOOOOOOOOOOOOOOOOOOOOxoc:;;;,,,'.\n"
+                    "   xOOOOOOOOOOOdc::ldkOOOOOOOOOOOOOOOOOOOkdc;,,,''\n"
+                    "   xOOOOOOOOOOOdc::;;,;cdkOOOOOOOOOOOOOOOOOOOxl;''\n"
+                    "   .lkOOOOOOOOOdc::;;,,''..;oOOOOOOOOOOOOOOOOOOOx'\n"
+                    "      .;oOOOOOOdc::;;,.       .:xOOOOOOOOOOOOd;.  \n"
+                    "          .:xOOdc:,.              'ckOOOOkl'      \n"
+                    "             .od'                    'xk,         \n"
+                    "\n");
 
     nrf_cli_fprintf(p_cli,NRF_CLI_NORMAL,
-                    "                Nordic Semiconductor              \r\n\r\n");
+                    "                Nordic Semiconductor              \n\n");
 }
 
 /** @brief Command set array. */

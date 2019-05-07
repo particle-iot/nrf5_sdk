@@ -1,30 +1,30 @@
 /**
- * Copyright (c) 2018 - 2018, Nordic Semiconductor ASA
- * 
+ * Copyright (c) 2018 - 2019, Nordic Semiconductor ASA
+ *
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form, except as embedded into a Nordic
  *    Semiconductor ASA integrated circuit in a product or a software update for
  *    such product, must reproduce the above copyright notice, this list of
  *    conditions and the following disclaimer in the documentation and/or other
  *    materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
- * 
+ *
  * 4. This software, with or without modification, must only be used with a
  *    Nordic Semiconductor ASA integrated circuit.
- * 
+ *
  * 5. Any software provided in binary form under this license must not be reverse
  *    engineered, decompiled, modified and/or disassembled.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
  * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -35,7 +35,7 @@
  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  */
 
 #include <ctype.h>
@@ -52,7 +52,7 @@
 #include "adafruit_pn532.h"
 
 #define UNKNOWN_PARAMETER     "unknown parameter: "
-#define WRONG_PARAMETER_COUNT "wrong parameter count \r\n"
+#define WRONG_PARAMETER_COUNT "wrong parameter count \n"
 #define KEY_PASSKEY_LEN       (6U)
 
 #define UNIT_TO_MSEC(uint, resolution) (uint16_t)(((uint) * (resolution)) / 1000)            /**< Macro for converting ticks into milliseconds. */
@@ -115,7 +115,7 @@ static inline bool conn_handle_is_valid(uint16_t conn_handle, nrf_cli_t const * 
 {
     if (conn_handle == BLE_CONN_HANDLE_INVALID)
     {
-        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "Invalid device address\r\n");
+        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "Invalid device address\n");
         return false;
     }
 
@@ -373,7 +373,7 @@ static void phy_set(nrf_cli_t const * p_cli, uint8_t value, uint16_t conn_handle
 
     // Set new PHY value.
     preferred_phy_set(&phy, conn_handle);
-    nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "Preferred PHY set to %s.\r\n", phy_str(&phy));
+    nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "Preferred PHY set to %s.\n", phy_str(&phy));
 }
 
 
@@ -409,7 +409,7 @@ static void device_list_print(nrf_cli_t const * p_cli, scanned_device_t * p_devi
             char buffer[ADDR_STRING_LEN];
             int_addr_to_hex_str(buffer, BLE_GAP_ADDR_LEN, p_device[i].addr);
 
-            nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "%s %s\r\n", buffer,  p_device[i].dev_name);
+            nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "%s %s\n", buffer,  p_device[i].dev_name);
         }
     }
 }
@@ -445,7 +445,7 @@ static void cccd_set(nrf_cli_t const * p_cli, uint16_t cccd, char * p_addr, char
     {
         nrf_cli_fprintf(p_cli,
                         NRF_CLI_ERROR,
-                        "Wrong characteristic UUID or the CCCD descriptor has not been found yet\r\n");
+                        "Wrong characteristic UUID or the CCCD descriptor has not been found yet\n");
         return;
     }
 
@@ -467,7 +467,7 @@ static void cccd_set(nrf_cli_t const * p_cli, uint16_t cccd, char * p_addr, char
     {
         nrf_cli_fprintf(p_cli,
                         NRF_CLI_ERROR,
-                        "wrong characteristic UUID or the CCCD descriptor has not been found yet\r\n");
+                        "wrong characteristic UUID or the CCCD descriptor has not been found yet\n");
     }
 }
 
@@ -487,7 +487,7 @@ static void cmd_connected_display(nrf_cli_t const * p_cli, size_t argc, char ** 
     ble_gap_conn_sec_t security_params;
     memset(&security_params, 0, sizeof(security_params));
 
-    nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "Connected devices:\r\n");
+    nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "Connected devices:\n");
 
     for (uint8_t i = 0; i < m_cli_connected.cmd_counter; i++)
     {
@@ -499,13 +499,13 @@ static void cmd_connected_display(nrf_cli_t const * p_cli, size_t argc, char ** 
 
         if (err_code != NRF_SUCCESS)
         {
-            nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "Security level reading has failed\r\n");
+            nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "Security level reading has failed\n");
 
             return;
         }
         nrf_cli_fprintf(p_cli,
                         NRF_CLI_NORMAL,
-                        "%d. %s Security level: %d \r\n",
+                        "%d. %s Security level: %d \n",
                         i,
                         m_cli_connected.buffer_type.connected_cmd_buffer[i],
                         security_params.sec_mode.lv);
@@ -523,7 +523,7 @@ static void cmd_privacy(nrf_cli_t const * p_cli, size_t argc, char ** argv)
         return;
     }
 
-    nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s%s\r\n", UNKNOWN_PARAMETER, argv[1]);
+    nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s%s\n", UNKNOWN_PARAMETER, argv[1]);
 
 }
 
@@ -539,7 +539,7 @@ static void cmd_privacy_on(nrf_cli_t const * p_cli, size_t argc, char ** argv)
     ble_gap_privacy_params_t privacy_params;
 
     // Privacy settings cannot be changed while advertising, scanning, or creating a connection.
-    (void)sd_ble_gap_scan_stop();
+    scan_stop();
     adv_stop();
     err_code = sd_ble_gap_connect_cancel();
     ret_code_verify(err_code);
@@ -573,8 +573,7 @@ static void cmd_privacy_off(nrf_cli_t const * p_cli, size_t argc, char ** argv)
     ble_gap_privacy_params_t privacy_params;
 
      // Privacy settings cannot be changed while advertising, scanning, or creating a connection. 
-    (void)sd_ble_gap_scan_stop();
-
+    scan_stop();
     adv_stop();
 
     err_code = sd_ble_gap_connect_cancel();
@@ -600,7 +599,7 @@ static void cmd_numeric(nrf_cli_t const * p_cli, size_t argc, char ** argv)
         return;
     }
 
-    nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s\r\n", UNKNOWN_PARAMETER, argv[1]);
+    nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s\n", UNKNOWN_PARAMETER, argv[1]);
 }
 
 
@@ -622,13 +621,13 @@ static void cmd_numeric_accept(nrf_cli_t const * p_cli, size_t argc, char ** arg
 
         // Clear numeric match flag.
         numeric_match_request_clear();
-        nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "Numeric Match\r\n");
+        nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "Numeric Match\n");
     }
     else
     {
         nrf_cli_fprintf(p_cli,
                         NRF_CLI_ERROR,
-                        "This command can be used only with numeric comparison pairing\r\n");
+                        "This command can be used only with numeric comparison pairing\n");
     }
 }
 
@@ -651,13 +650,13 @@ static void cmd_numeric_reject(nrf_cli_t const * p_cli, size_t argc, char ** arg
 
         // Clear a numeric match flag.
         numeric_match_request_clear();
-        nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "Numeric Reject\r\n");
+        nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "Numeric Reject\n");
     }
     else
     {
         nrf_cli_fprintf(p_cli,
                         NRF_CLI_ERROR,
-                        "This command can be used only with numeric comparison pairing\r\n");
+                        "This command can be used only with numeric comparison pairing\n");
     }
 }
 
@@ -670,7 +669,7 @@ static void cmd_nfc_reader(nrf_cli_t const * p_cli, size_t argc, char ** argv)
         nrf_cli_help_print(p_cli, NULL, 0);
         return;
     }
-    nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s%s\r\n", UNKNOWN_PARAMETER, argv[1]);
+    nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s%s\n", UNKNOWN_PARAMETER, argv[1]);
 }
 
 
@@ -698,7 +697,7 @@ static void cmd_nfc_reader_on(nrf_cli_t const * p_cli, size_t argc, char ** argv
     APP_ERROR_CHECK(err_code);
 
     nfc_pair_start();
-    nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "NFC reader ON\r\n");
+    nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "NFC reader ON\n");
 }
 
 
@@ -720,7 +719,7 @@ static void cmd_nfc_reader_off(nrf_cli_t const * p_cli, size_t argc, char ** arg
     err_code = adafruit_pn532_field_off();
     ret_code_verify(err_code);
 
-    nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "NFC reader OFF\r\n");
+    nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "NFC reader OFF\n");
 }
 
 
@@ -734,7 +733,7 @@ static void cmd_gatt(nrf_cli_t const * p_cli, size_t argc, char ** argv)
         return;
     }
 
-    nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s%s\r\n", UNKNOWN_PARAMETER, argv[1]);
+    nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s%s\n", UNKNOWN_PARAMETER, argv[1]);
 }
 
 
@@ -797,7 +796,7 @@ static void cmd_char_get(nrf_cli_t const * p_cli, size_t argc, char ** argv)
     {
         nrf_cli_fprintf(p_cli,
                         NRF_CLI_ERROR,
-                        "incorrect service UUID or service does not exist\r\n");
+                        "incorrect service UUID or service does not exist\n");
     }
 }
 
@@ -831,7 +830,7 @@ static void cmd_char_read(nrf_cli_t const * p_cli, size_t argc, char ** argv)
     {
         nrf_cli_fprintf(p_cli,
                         NRF_CLI_ERROR,
-                        "%s%s\r\n",
+                        "%s%s\n",
                         "The selected service does not contain the characteristic - ",
                         argv[2]);
         return;
@@ -875,7 +874,7 @@ static void cmd_char_write(nrf_cli_t const * p_cli, size_t argc, char ** argv)
     }
     else
     {
-        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s%s\r\n", UNKNOWN_PARAMETER, argv[1]);
+        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s%s\n", UNKNOWN_PARAMETER, argv[1]);
         return;
     }
 
@@ -894,7 +893,7 @@ static void cmd_char_write(nrf_cli_t const * p_cli, size_t argc, char ** argv)
     {
         nrf_cli_fprintf(p_cli,
                         NRF_CLI_ERROR,
-                        "%s%s\r\n",
+                        "%s%s\n",
                         "The selected service does not contain the characteristic - ",
                         argv[3]);
         return;
@@ -925,7 +924,7 @@ static void cmd_notify(nrf_cli_t const * p_cli, size_t argc, char ** argv)
         return;
     }
 
-    nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s%s\r\n", UNKNOWN_PARAMETER, argv[1]);
+    nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s%s\n", UNKNOWN_PARAMETER, argv[1]);
 }
 
 /**@brief Command handler for enabling a notification.
@@ -957,7 +956,7 @@ static void cmd_ind(nrf_cli_t const * p_cli, size_t argc, char ** argv)
         return;
     }
 
-    nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s%s\r\n", UNKNOWN_PARAMETER, argv[1]);
+    nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s%s\n", UNKNOWN_PARAMETER, argv[1]);
 
 }
 
@@ -1000,7 +999,7 @@ static void cmd_data_length_set(nrf_cli_t const * p_cli, size_t argc, char ** ar
     {
         if (!isdigit((int) argv[2][i]))
         {
-            nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "data length must be a number\r\n");
+            nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "data length must be a number\n");
             return;
         }
     }
@@ -1093,7 +1092,7 @@ static void cmd_phy(nrf_cli_t const * p_cli, size_t argc, char * * argv)
         return;
     }
 
-    nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s%s\r\n", UNKNOWN_PARAMETER, argv[1]);
+    nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s%s\n", UNKNOWN_PARAMETER, argv[1]);
 
 }
 
@@ -1106,7 +1105,7 @@ static void cmd_parameters(nrf_cli_t const * p_cli, size_t argc, char ** argv)
         return;
     }
 
-    nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s%s\r\n", UNKNOWN_PARAMETER, argv[1]);
+    nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s%s\n", UNKNOWN_PARAMETER, argv[1]);
 }
 
 
@@ -1130,7 +1129,7 @@ static void cmd_mtu_set(nrf_cli_t const * p_cli, size_t argc, char ** argv)
     {
         if (!isdigit((int) argv[1][i]))
         {
-            nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "MTU must be a number\r\n");
+            nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "MTU must be a number\n");
             return;
         }
     }
@@ -1156,7 +1155,7 @@ static void cmd_min_conn_interval_set(nrf_cli_t const * p_cli, size_t argc, char
     {
         if (!isdigit((int) argv[1][i]))
         {
-            nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "min_conn_interval must be a number\r\n");
+            nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "min_conn_interval must be a number\n");
             return;
         }
     }
@@ -1167,7 +1166,7 @@ static void cmd_min_conn_interval_set(nrf_cli_t const * p_cli, size_t argc, char
     if ((value < MSEC_TO_UNITS(BLE_GAP_CP_MIN_CONN_INTVL_MIN, UNIT_1_25_MS)) || 
         (value > MSEC_TO_UNITS(BLE_GAP_CP_MIN_CONN_INTVL_MAX, UNIT_1_25_MS)))
     {
-        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s %d and %d.\r\n",
+        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s %d and %d.\n",
                         "Minimum connection interval must be between",
                         BLE_GAP_CP_MIN_CONN_INTVL_MIN,
                         BLE_GAP_CP_MIN_CONN_INTVL_MAX);
@@ -1194,7 +1193,7 @@ static void cmd_max_conn_interval_set(nrf_cli_t const * p_cli, size_t argc, char
     {
         if (!isdigit((int) argv[1][i]))
         {
-            nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "max_conn_interval must be a number.\r\n");
+            nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "max_conn_interval must be a number.\n");
             return;
         }
     }
@@ -1205,7 +1204,7 @@ static void cmd_max_conn_interval_set(nrf_cli_t const * p_cli, size_t argc, char
     if ((value < MSEC_TO_UNITS(BLE_GAP_CP_MAX_CONN_INTVL_MIN, UNIT_1_25_MS)) || 
         (value > MSEC_TO_UNITS(BLE_GAP_CP_MAX_CONN_INTVL_MAX, UNIT_1_25_MS)))
     {
-        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s %d and %d.\r\n",
+        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s %d and %d.\n",
                         "Maximum connection interval must be between",
                         BLE_GAP_CP_MAX_CONN_INTVL_MIN,
                         BLE_GAP_CP_MAX_CONN_INTVL_MAX);
@@ -1232,7 +1231,7 @@ static void cmd_slave_latency_set(nrf_cli_t const * p_cli, size_t argc, char ** 
     {
         if (!isdigit((int) argv[1][i]))
         {
-            nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "Slave latency must be a number\r\n");
+            nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "Slave latency must be a number\n");
             return;
         }
     }
@@ -1243,7 +1242,7 @@ static void cmd_slave_latency_set(nrf_cli_t const * p_cli, size_t argc, char ** 
     {
         nrf_cli_fprintf(p_cli,
                         NRF_CLI_ERROR,
-                        "%s%d.\r\n",
+                        "%s%d.\n",
                         "Slave latency should be less than: ",
                         BLE_GAP_CP_SLAVE_LATENCY_MAX);
         return;
@@ -1273,7 +1272,7 @@ static void cmd_sup_timeout_set(nrf_cli_t const * p_cli, size_t argc, char ** ar
         {
             nrf_cli_fprintf(p_cli,
                             NRF_CLI_ERROR,
-                            "Supervision time-out must be a number.\r\n");
+                            "Supervision time-out must be a number.\n");
             return;
         }
     }
@@ -1288,7 +1287,7 @@ static void cmd_sup_timeout_set(nrf_cli_t const * p_cli, size_t argc, char ** ar
     {
         nrf_cli_fprintf(p_cli,
                         NRF_CLI_ERROR,
-                        "%s  %d and %d.\r\n",
+                        "%s  %d and %d.\n",
                         "Supervision time-out must be between",
                         BLE_GAP_CP_CONN_SUP_TIMEOUT_MIN,
                         BLE_GAP_CP_CONN_SUP_TIMEOUT_MAX);
@@ -1299,7 +1298,7 @@ static void cmd_sup_timeout_set(nrf_cli_t const * p_cli, size_t argc, char ** ar
     {
         nrf_cli_fprintf(p_cli,
                         NRF_CLI_ERROR,
-                        "%s \r\n%s%d\r\n",
+                        "%s \n%s%d\n",
                         "Supervision_Timeout in milliseconds shall be larger than:",
                         "(1 + Slave_Latency) * Conn_Interval_Max * 2 - ",
                         valid);
@@ -1338,7 +1337,7 @@ static void cmd_connection_params_set(nrf_cli_t const * p_cli, size_t argc, char
     {
         nrf_cli_fprintf(p_cli,
                         NRF_CLI_NORMAL,
-                        "Preferred connection parameters changed successfully\r\n");
+                        "Preferred connection parameters changed successfully\n");
 
         default_con_param(&m_params_update);
     }
@@ -1346,7 +1345,7 @@ static void cmd_connection_params_set(nrf_cli_t const * p_cli, size_t argc, char
     {
         nrf_cli_fprintf(p_cli,
                         NRF_CLI_ERROR,
-                        "Connection parameters could not be changed\r\n");
+                        "Connection parameters could not be changed\n");
     }
 }
 
@@ -1366,7 +1365,7 @@ static void cmd_devices_display(nrf_cli_t const * p_cli, size_t argc, char ** ar
         {
             nrf_cli_fprintf(p_cli,
                             NRF_CLI_ERROR,
-                            "%s:%s%s\r\n",
+                            "%s:%s%s\n",
                             argv[0],
                             " bad parameter ",
                             argv[1]);
@@ -1388,7 +1387,7 @@ static void cmd_remove(nrf_cli_t const * p_cli, size_t argc, char ** argv)
         return;
     }
 
-    nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s%s\r\n", UNKNOWN_PARAMETER, argv[1]);
+    nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s%s\n", UNKNOWN_PARAMETER, argv[1]);
 }
 
 
@@ -1408,7 +1407,7 @@ static void cmd_bonded_devices_display(nrf_cli_t const * p_cli, size_t argc, cha
         return;
     }
 
-    nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "Peers count: %d \r\n", pm_peer_count());
+    nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "Peers count: %d \n", pm_peer_count());
 
     pm_peer_id_t current_peer_id = pm_next_peer_id_get(PM_PEER_ID_INVALID);
 
@@ -1432,7 +1431,7 @@ static void cmd_bonded_devices_display(nrf_cli_t const * p_cli, size_t argc, cha
                             data.peer_ble_id.id_addr_info.addr);
 
         // Display bonded device.
-        nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "%s\r\n", string_addr_buf);
+        nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "%s\n", string_addr_buf);
     }
 }
 
@@ -1457,7 +1456,7 @@ static void cmd_device_pair(nrf_cli_t const * p_cli, size_t argc, char ** argv)
     }
     else
     {
-        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s:%s%s\r\n", argv[0], " wrong command ", argv[1]);
+        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s:%s%s\n", argv[0], " wrong command ", argv[1]);
         return;
     }
 
@@ -1500,11 +1499,11 @@ static void cmd_device_pair(nrf_cli_t const * p_cli, size_t argc, char ** argv)
     {
         nrf_cli_fprintf(p_cli,
                         NRF_CLI_ERROR,
-                        "Device is not connected or is already paired\r\n");
+                        "Device is not connected or is already paired\n");
     }
     else
     {
-        nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "Start pairing\r\n");
+        nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "Start pairing\n");
     }
 }
 
@@ -1527,13 +1526,13 @@ static void cmd_key_reply(nrf_cli_t const * p_cli, size_t argc, char ** argv)
 
     if (!m_key_request_event)
     {
-        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "No key request\r\n");
+        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "No key request\n");
         return;
     }
 
     if (strlen(argv[1]) != KEY_PASSKEY_LEN)
     {
-        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s", "invalid key length!\r\n");
+        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s", "invalid key length!\n");
         return;
     }
 
@@ -1544,7 +1543,7 @@ static void cmd_key_reply(nrf_cli_t const * p_cli, size_t argc, char ** argv)
     {
         if (!isdigit((int) argv[1][i]))
         {
-            nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "the key must consist of digits\r\n");
+            nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "the key must consist of digits\n");
             return;
         }
 
@@ -1559,11 +1558,11 @@ static void cmd_key_reply(nrf_cli_t const * p_cli, size_t argc, char ** argv)
 
     if (err_code != NRF_SUCCESS)
     {
-        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "Error sending key\r\n");
+        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "Error sending key\n");
     }
     else
     {
-        nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "Key sending success\r\n");
+        nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "Key sending success\n");
     }
 }
 
@@ -1623,7 +1622,7 @@ static void cmd_advertise_on(nrf_cli_t const * p_cli, size_t argc, char ** argv)
     adv_stop();
     err_code = nfc_ble_pair_stop();
     ret_code_verify(err_code);
-    nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "Advertising enabled\r\n");
+    nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "Advertising enabled\n");
     adv_start();
     err_code = nfc_ble_pair_start();
     APP_ERROR_CHECK(err_code);
@@ -1645,7 +1644,7 @@ static void cmd_advertise_off(nrf_cli_t const * p_cli, size_t argc, char ** argv
     adv_stop();
     err_code = nfc_ble_pair_stop();
     ret_code_verify(err_code);
-    nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "Advertising disabled\r\n");
+    nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "Advertising disabled\n");
 }
 
 
@@ -1657,7 +1656,7 @@ static void cmd_advertise(nrf_cli_t const * p_cli, size_t argc, char ** argv)
         return;
     }
 
-    nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s%s\r\n", UNKNOWN_PARAMETER, argv[1]);
+    nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s%s\n", UNKNOWN_PARAMETER, argv[1]);
 }
 
 
@@ -1677,7 +1676,7 @@ static void cmd_scan_off(nrf_cli_t const * p_cli, size_t argc, char ** argv)
     }
 
     scan_stop();
-    nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "Scan stopped\r\n");
+    nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "Scan stopped\n");
 }
 
 
@@ -1697,7 +1696,7 @@ static void cmd_scan_on(nrf_cli_t const * p_cli, size_t argc, char ** argv)
     }
 
     scan_start();
-    nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "Scan started\r\n");
+    nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "Scan started\n");
 }
 
 
@@ -1711,7 +1710,7 @@ static void cmd_scan(nrf_cli_t const * p_cli, size_t argc, char ** argv)
 
         nrf_cli_fprintf(p_cli,
                         NRF_CLI_ERROR,
-                        "%s%s\r\n",
+                        "%s%s\n",
                         UNKNOWN_PARAMETER,
                         argv[1]);
 }
@@ -1743,7 +1742,7 @@ static void cmd_device_connect(nrf_cli_t const * p_cli, size_t argc, char ** arg
         {
             nrf_cli_fprintf(p_cli,
                             NRF_CLI_ERROR,
-                            "wrong address length - Correct format: XX:XX:XX:XX:XX:XX\r\n");
+                            "wrong address length - Correct format: XX:XX:XX:XX:XX:XX\n");
             return;
         }
 
@@ -1777,7 +1776,7 @@ static void cmd_device_disconnect(nrf_cli_t const * p_cli, size_t argc, char ** 
     {
         nrf_cli_fprintf(p_cli,
                         NRF_CLI_ERROR,
-                        "wrong address length - Correct format: XX:XX:XX:XX:XX:XX\r\n");
+                        "wrong address length - Correct format: XX:XX:XX:XX:XX:XX\n");
         return;
     }
 
@@ -1802,7 +1801,7 @@ static void cmd_all_bonds_delete(nrf_cli_t const * p_cli, size_t argc, char * * 
 {
 	if (argc == 1)
 	{
-	    nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "Bonding data deleted\r\n");
+	    nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "Bonding data deleted\n");
 	    bonds_delete();
 	    return;
 	}
@@ -1813,7 +1812,7 @@ static void cmd_all_bonds_delete(nrf_cli_t const * p_cli, size_t argc, char * * 
 	    return;
 	}
 
-	nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s%s\r\n", UNKNOWN_PARAMETER, argv[1]);
+	nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s%s\n", UNKNOWN_PARAMETER, argv[1]);
 }
 
 

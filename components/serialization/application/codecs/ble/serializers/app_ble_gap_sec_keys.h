@@ -1,30 +1,30 @@
 /**
- * Copyright (c) 2014 - 2018, Nordic Semiconductor ASA
- * 
+ * Copyright (c) 2014 - 2019, Nordic Semiconductor ASA
+ *
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form, except as embedded into a Nordic
  *    Semiconductor ASA integrated circuit in a product or a software update for
  *    such product, must reproduce the above copyright notice, this list of
  *    conditions and the following disclaimer in the documentation and/or other
  *    materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
- * 
+ *
  * 4. This software, with or without modification, must only be used with a
  *    Nordic Semiconductor ASA integrated circuit.
- * 
+ *
  * 5. Any software provided in binary form under this license must not be reverse
  *    engineered, decompiled, modified and/or disassembled.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
  * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -35,7 +35,7 @@
  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  */
 #ifndef _APP_BLE_GAP_SEC_KEYS_H
 #define _APP_BLE_GAP_SEC_KEYS_H
@@ -53,6 +53,7 @@
 #include "ble_types.h"
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -68,6 +69,8 @@ typedef struct
   uint8_t                conn_active;    /**< Indication that keys for this connection are used by the SoftDevice. 0: keys used; 1: keys not used. */
   ble_gap_sec_keyset_t   keyset;         /**< Keyset structure, see @ref ble_gap_sec_keyset_t.*/
 } ser_ble_gap_app_keyset_t;
+
+void app_ble_gap_sec_keys_init(void);
 
 /**@brief Allocates the instance in m_app_keys_table[] for storage of encryption keys.
  *
@@ -101,48 +104,14 @@ uint32_t app_ble_gap_sec_context_find(uint16_t conn_handle, uint32_t *p_index);
 /** @} */
 
 #if NRF_SD_BLE_API_VERSION >= 6
-/**
- * @brief Stores buffer for adv report data.
- *
- * @param p_data Pointer to the buffer.
- *
- * @return NRF_SUCCESS or error in case pointer is already set.
- */
-uint32_t app_ble_gap_scan_data_set(ble_data_t const * p_data);
 
-/**
- * @brief Returns pointer to the buffer for storing report data. Returns error if not paired with
- *        @ref app_ble_gap_scan_data_set call.
- *
- * @param[out] p_data Stored data.
- * @return NRF_SUCCESS or error in case pointer is already cleared.
- */
-uint32_t app_ble_gap_scan_data_fetch_clear(ble_data_t * p_data);
+int app_ble_gap_adv_buf_register(void * p_buf);
+void *app_ble_gap_adv_buf_unregister(int id, bool event_context);
+void app_ble_gap_adv_buf_addr_unregister(void * p_buf, bool event_context);
 
-/**
- * @brief Function for registering data pointers related with given adv_handle.
- *
- * @param adv_handle      Handle.
- * @param p_adv_data      Adv_data buffer.
- * @param p_scan_rsp_data Scan_rsp_data buffer.
- *
- * @return NRF_SUCCESS or error.
- *
- */
-uint32_t app_ble_gap_adv_set_register(uint8_t adv_handle, uint8_t * p_adv_data, uint8_t * p_scan_rsp_data);
+void app_ble_gap_scan_data_set(uint8_t * p_scan_data);
+void app_ble_gap_scan_data_unset(bool free);
 
-
-/**
- * @brief Function for unregistering given .
- *
- * @param[in]  adv_handle       Handle.
- * @param[out] pp_adv_data      Pointer to adv_data buffer associated with given adv_handle.
- * @param[out] pp_scan_rsp_data Pointer to adv_data buffer associated with given adv_handle.
- *
- * @return NRF_SUCCESS or error.
- *
- */
-uint32_t app_ble_gap_adv_set_unregister(uint8_t adv_handle, uint8_t * * pp_adv_data, uint8_t **pp_scan_rsp_data);
 #endif
 #ifdef __cplusplus
 }

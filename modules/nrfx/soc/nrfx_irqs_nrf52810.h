@@ -1,30 +1,30 @@
 /**
- * Copyright (c) 2017 - 2018, Nordic Semiconductor ASA
- * 
+ * Copyright (c) 2017 - 2019, Nordic Semiconductor ASA
+ *
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form, except as embedded into a Nordic
  *    Semiconductor ASA integrated circuit in a product or a software update for
  *    such product, must reproduce the above copyright notice, this list of
  *    conditions and the following disclaimer in the documentation and/or other
  *    materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
- * 
+ *
  * 4. This software, with or without modification, must only be used with a
  *    Nordic Semiconductor ASA integrated circuit.
- * 
+ *
  * 5. Any software provided in binary form under this license must not be reverse
  *    engineered, decompiled, modified and/or disassembled.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
  * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -35,7 +35,7 @@
  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  */
 
 #ifndef NRFX_IRQS_NRF52832_H__
@@ -51,23 +51,30 @@ extern "C" {
 
 // RADIO_IRQn
 
-// UARTE0_IRQn
-#define nrfx_uarte_0_irq_handler    UARTE0_IRQHandler
-
-// TWIM0_TWIS0_IRQn
-#if NRFX_CHECK(NRFX_PRS_BOX_0_ENABLED)
-#define nrfx_prs_box_0_irq_handler  TWIM0_TWIS0_IRQHandler
+// UARTE0_UART0_IRQn
+#if NRFX_CHECK(NRFX_PRS_BOX_2_ENABLED)
+#define nrfx_prs_box_2_irq_handler  UARTE0_UART0_IRQHandler
 #else
-#define nrfx_twim_0_irq_handler     TWIM0_TWIS0_IRQHandler
-#define nrfx_twis_0_irq_handler     TWIM0_TWIS0_IRQHandler
+#define nrfx_uarte_0_irq_handler    UARTE0_UART0_IRQHandler
+#define nrfx_uart_0_irq_handler     UARTE0_UART0_IRQHandler
 #endif
 
-// SPIM1_SPIS1_IRQn
-#if NRFX_CHECK(NRFX_PRS_BOX_1_ENABLED)
-#define nrfx_prs_box_1_irq_handler  SPIM1_SPIS1_IRQHandler
+// TWIM0_TWIS0_TWI0_IRQn
+#if NRFX_CHECK(NRFX_PRS_BOX_0_ENABLED)
+#define nrfx_prs_box_0_irq_handler  TWIM0_TWIS0_TWI0_IRQHandler
 #else
-#define nrfx_spim_1_irq_handler     SPIM1_SPIS1_IRQHandler
-#define nrfx_spis_1_irq_handler     SPIM1_SPIS1_IRQHandler
+#define nrfx_twim_0_irq_handler     TWIM0_TWIS0_TWI0_IRQHandler
+#define nrfx_twis_0_irq_handler     TWIM0_TWIS0_TWI0_IRQHandler
+#define nrfx_twi_0_irq_handler      TWIM0_TWIS0_TWI0_IRQHandler
+#endif
+
+// SPIM0_SPIS0_SPI0_IRQn
+#if NRFX_CHECK(NRFX_PRS_BOX_1_ENABLED)
+#define nrfx_prs_box_1_irq_handler  SPIM0_SPIS0_SPI0_IRQHandler
+#else
+#define nrfx_spim_0_irq_handler     SPIM0_SPIS0_SPI0_IRQHandler
+#define nrfx_spis_0_irq_handler     SPIM0_SPIS0_SPI0_IRQHandler
+#define nrfx_spi_0_irq_handler      SPIM0_SPIS0_SPI0_IRQHandler
 #endif
 
 // GPIOTE_IRQn

@@ -30,4 +30,5 @@ SECTIONS
 
 } INSERT AFTER .text
 
+
 INCLUDE "nrf_common.ld"

@@ -1,30 +1,30 @@
 /**
- * Copyright (c) 2014 - 2018, Nordic Semiconductor ASA
- * 
+ * Copyright (c) 2014 - 2019, Nordic Semiconductor ASA
+ *
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form, except as embedded into a Nordic
  *    Semiconductor ASA integrated circuit in a product or a software update for
  *    such product, must reproduce the above copyright notice, this list of
  *    conditions and the following disclaimer in the documentation and/or other
  *    materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
- * 
+ *
  * 4. This software, with or without modification, must only be used with a
  *    Nordic Semiconductor ASA integrated circuit.
- * 
+ *
  * 5. Any software provided in binary form under this license must not be reverse
  *    engineered, decompiled, modified and/or disassembled.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
  * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -35,7 +35,7 @@
  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  */
 #ifndef _CONN_BLE_GAP_SEC_KEYS_H
 #define _CONN_BLE_GAP_SEC_KEYS_H
@@ -51,14 +51,11 @@
 
 #include "ble_gap.h"
 #include <stdint.h>
-
+#include <stdbool.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#ifndef SER_MAX_CONNECTIONS
-#define SER_MAX_CONNECTIONS 8
-#endif
 
 /**@brief GAP connection - keyset mapping structure.
  *
@@ -78,6 +75,9 @@ typedef struct
   ble_gap_sign_info_t     sign_key_peer;   /**< Peer Signing Information, see @ref ble_gap_sign_info_t. */
   ble_gap_lesc_p256_pk_t  pk_peer;         /**< Peer Public key, see @ref ble_gap_lesc_p256_pk_t. */
 } ser_ble_gap_conn_keyset_t;
+
+/**@brief Initializes buffer pool. */
+void conn_ble_gap_sec_keys_init(void);
 
 /**@brief Allocates instance in m_conn_keys_table[] for storage of encryption keys.
  *
@@ -119,7 +119,10 @@ uint8_t * conn_ble_gap_ble_data_buf_alloc(uint32_t id);
 /** @brief Function for freeing the buffer.
  * @param p_data Buffer to be freed.
  */
-void conn_ble_gap_ble_data_buf_free(uint8_t * p_data);
+uint32_t conn_ble_gap_ble_data_buf_free(uint8_t * p_data);
+
+void conn_ble_gap_scan_data_set(uint8_t * p_scan_data);
+void conn_ble_gap_scan_data_unset(bool free);
 
 #ifdef __cplusplus
 }

@@ -1,30 +1,30 @@
 /**
- * Copyright (c) 2016 - 2018, Nordic Semiconductor ASA
- * 
+ * Copyright (c) 2016 - 2019, Nordic Semiconductor ASA
+ *
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form, except as embedded into a Nordic
  *    Semiconductor ASA integrated circuit in a product or a software update for
  *    such product, must reproduce the above copyright notice, this list of
  *    conditions and the following disclaimer in the documentation and/or other
  *    materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
- * 
+ *
  * 4. This software, with or without modification, must only be used with a
  *    Nordic Semiconductor ASA integrated circuit.
- * 
+ *
  * 5. Any software provided in binary form under this license must not be reverse
  *    engineered, decompiled, modified and/or disassembled.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
  * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -35,7 +35,7 @@
  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  */
 #include "nrf_dfu_ble.h"
 
@@ -56,17 +56,21 @@
 #include "nrf_balloc.h"
 #include "nrf_delay.h"
 #include "nrf_dfu_settings.h"
+#include "nrf_dfu_ble.h"
 
 #define NRF_LOG_MODULE_NAME nrf_dfu_ble
 #include "nrf_log.h"
 NRF_LOG_MODULE_REGISTER();
 
+#ifndef NRF_DFU_BLE_ADV_INTERVAL
+#define NRF_DFU_BLE_ADV_INTERVAL 40 /* 40 * 0,625ms = 25ms */
+#warning "sdk_config.h is not up to date."
+#endif
 
 #define APP_BLE_CONN_CFG_TAG                1                                                       /**< A tag identifying the SoftDevice BLE configuration. */
 
 #define APP_ADV_DATA_HEADER_SIZE            9                                                       /**< Size of encoded advertisement data header (not including device name). */
 #define APP_ADV_DURATION                    BLE_GAP_ADV_TIMEOUT_GENERAL_UNLIMITED                   /**< The advertising duration in units of 10 milliseconds. This is set to @ref BLE_GAP_ADV_TIMEOUT_GENERAL_UNLIMITED so that the advertisement is done as long as there there is a call to @ref dfu_transport_close function.*/
-#define APP_ADV_INTERVAL                    MSEC_TO_UNITS(25, UNIT_0_625_MS)                        /**< The advertising interval (25 ms.). */
 
 #define GATT_HEADER_LEN                     3                                                       /**< GATT header length. */
 #define GATT_PAYLOAD(mtu)                   ((mtu) - GATT_HEADER_LEN)                               /**< Length of the ATT payload for a given ATT MTU. */
@@ -97,9 +101,6 @@ NRF_LOG_MODULE_REGISTER();
        Payload length is set to NRF_SDH_BLE_GATT_MAX_MTU_SIZE - 3.
 #endif
 
-
-static uint32_t ble_dfu_transport_init(nrf_dfu_observer_t observer);
-static uint32_t ble_dfu_transport_close(nrf_dfu_transport_t const * p_exception);
 
 DFU_TRANSPORT_REGISTER(nrf_dfu_transport_t const ble_dfu_transport) =
 {
@@ -195,7 +196,7 @@ static uint32_t advertising_start(void)
         .properties.type = BLE_GAP_ADV_TYPE_CONNECTABLE_SCANNABLE_UNDIRECTED,
         .p_peer_addr     = NULL,
         .filter_policy   = BLE_GAP_ADV_FP_ANY,
-        .interval        = APP_ADV_INTERVAL,
+        .interval        = NRF_DFU_BLE_ADV_INTERVAL,
         .duration        = APP_ADV_DURATION,
         .primary_phy     = BLE_GAP_PHY_1MBPS,
     };
@@ -205,14 +206,8 @@ static uint32_t advertising_start(void)
 #if (NRF_DFU_BLE_REQUIRES_BONDS)
     ble_gap_irk_t empty_irk = {{0}};
 
-    if (memcmp(m_peer_data.ble_id.id_info.irk, empty_irk.irk, sizeof(ble_gap_irk_t)) == 0)
+    if (memcmp(m_peer_data.ble_id.id_info.irk, empty_irk.irk, sizeof(ble_gap_irk_t)) != 0)
     {
-        NRF_LOG_DEBUG("No IRK found, general discovery");
-    }
-    else
-    {
-        NRF_LOG_DEBUG("IRK Found, setting up whitelist");
-
         adv_flag                 = BLE_GAP_ADV_FLAG_BR_EDR_NOT_SUPPORTED;
         adv_params.filter_policy = BLE_GAP_ADV_FP_FILTER_CONNREQ;
 
@@ -489,14 +484,17 @@ static uint32_t on_ctrl_pt_write(ble_dfu_t * p_dfu, ble_gatts_evt_write_t const 
 
         case NRF_DFU_OP_OBJECT_CREATE:
         {
-            /* Activity on the current transport. Close all except the current one. */
-            (void) nrf_dfu_transports_close(&ble_dfu_transport);
-
             /* Reset the packet receipt notification on create object */
             m_pkt_notif_target_cnt = m_pkt_notif_target;
 
             request.create.object_type = p_ble_write_evt->data[1];
             request.create.object_size = uint32_decode(&(p_ble_write_evt->data[2]));
+
+            if (request.create.object_type == NRF_DFU_OBJ_TYPE_COMMAND)
+            {
+                /* Activity on the current transport. Close all except the current one. */
+                (void) nrf_dfu_transports_close(&ble_dfu_transport);
+            }
         } break;
 
         case NRF_DFU_OP_RECEIPT_NOTIF_SET:
@@ -720,7 +718,7 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
             err_code = sd_ble_gatts_exchange_mtu_reply(m_conn_handle, mtu_reply);
             APP_ERROR_CHECK(err_code);
         } break;
-
+#ifndef S112
         case BLE_GAP_EVT_DATA_LENGTH_UPDATE_REQUEST:
         {
             NRF_LOG_DEBUG("Received BLE_GAP_EVT_DATA_LENGTH_UPDATE_REQUEST.");
@@ -736,13 +734,13 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
             APP_ERROR_CHECK(err_code);
         } break;
 
-
         case BLE_GAP_EVT_DATA_LENGTH_UPDATE:
         {
             NRF_LOG_DEBUG("Received BLE_GAP_EVT_DATA_LENGTH_UPDATE (%u, max_rx_time %u).",
                           p_gap->params.data_length_update.effective_params.max_rx_octets,
                           p_gap->params.data_length_update.effective_params.max_rx_time_us);
         } break;
+#endif
 
         case BLE_GAP_EVT_SEC_PARAMS_REQUEST:
         {
@@ -782,6 +780,7 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
             NRF_LOG_DEBUG("conn_sup_timeout: %d",  p_conn->conn_sup_timeout);
         } break;
 
+#ifndef S112
         case BLE_GAP_EVT_CONN_PARAM_UPDATE_REQUEST:
         {
             NRF_LOG_DEBUG("Received BLE_GAP_EVT_CONN_PARAM_UPDATE_REQUEST");
@@ -796,6 +795,7 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
 
             APP_ERROR_CHECK(err_code);
         } break;
+#endif
 
         case BLE_GAP_EVT_PHY_UPDATE:
         {
@@ -963,12 +963,14 @@ static uint32_t ble_stack_init()
     /* Register as a BLE event observer to receive BLE events. */
     NRF_SDH_BLE_OBSERVER(m_ble_evt_observer, BLE_OBSERVER_PRIO, ble_evt_handler, NULL);
 
+#if (!defined(NRF_DFU_BLE_SKIP_SD_INIT)) || (NRF_DFU_BLE_SKIP_SD_INIT == 0)
     err_code = nrf_dfu_mbr_init_sd();
     VERIFY_SUCCESS(err_code);
 
     NRF_LOG_DEBUG("Setting up vector table: 0x%08x", BOOTLOADER_START_ADDR);
     err_code = sd_softdevice_vector_table_base_set(BOOTLOADER_START_ADDR);
     VERIFY_SUCCESS(err_code);
+#endif
 
     NRF_LOG_DEBUG("Enabling SoftDevice.");
     err_code = nrf_sdh_enable_request();
@@ -1133,7 +1135,7 @@ uint32_t ble_dfu_init(ble_dfu_t * p_dfu)
 }
 
 
-static uint32_t ble_dfu_transport_init(nrf_dfu_observer_t observer)
+uint32_t ble_dfu_transport_init(nrf_dfu_observer_t observer)
 {
     uint32_t err_code = NRF_SUCCESS;
 
@@ -1199,7 +1201,7 @@ static uint32_t ble_dfu_transport_init(nrf_dfu_observer_t observer)
 }
 
 
-static uint32_t ble_dfu_transport_close(nrf_dfu_transport_t const * p_exception)
+uint32_t ble_dfu_transport_close(nrf_dfu_transport_t const * p_exception)
 {
     uint32_t err_code = NRF_SUCCESS;
 
@@ -1231,6 +1233,27 @@ static uint32_t ble_dfu_transport_close(nrf_dfu_transport_t const * p_exception)
         if (err_code == NRF_SUCCESS)
         {
             NRF_LOG_DEBUG("BLE transport shut down.");
+        }
+    }
+
+    return err_code;
+}
+
+uint32_t ble_dfu_transport_disconnect(void)
+{
+    uint32_t err_code = NRF_SUCCESS;
+
+    if (m_flags & DFU_BLE_FLAG_INITIALIZED)
+    {
+        NRF_LOG_DEBUG("Disconnect from BLE peer.");
+
+        if (m_conn_handle != BLE_CONN_HANDLE_INVALID)
+        {
+            NRF_LOG_DEBUG("Disconnecting.");
+
+            /* Disconnect from the peer. */
+            err_code = sd_ble_gap_disconnect(m_conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
+            VERIFY_SUCCESS(err_code);
         }
     }
 

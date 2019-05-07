@@ -71,6 +71,12 @@
 
 static void buffer_add(nrf_fprintf_ctx_t * const p_ctx, char c)
 {
+#if NRF_MODULE_ENABLED(NRF_FPRINTF_FLAG_AUTOMATIC_CR_ON_LF)
+    if (c == '\n')
+    {
+        buffer_add(p_ctx, '\r');
+    }
+#endif
     p_ctx->p_io_buffer[p_ctx->io_buffer_cnt++] = c;
 
     if (p_ctx->io_buffer_cnt >= p_ctx->io_buffer_size)

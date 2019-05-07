@@ -1,30 +1,30 @@
 /**
- * Copyright (c) 2017 - 2018, Nordic Semiconductor ASA
- * 
+ * Copyright (c) 2017 - 2019, Nordic Semiconductor ASA
+ *
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form, except as embedded into a Nordic
  *    Semiconductor ASA integrated circuit in a product or a software update for
  *    such product, must reproduce the above copyright notice, this list of
  *    conditions and the following disclaimer in the documentation and/or other
  *    materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
- * 
+ *
  * 4. This software, with or without modification, must only be used with a
  *    Nordic Semiconductor ASA integrated circuit.
- * 
+ *
  * 5. Any software provided in binary form under this license must not be reverse
  *    engineered, decompiled, modified and/or disassembled.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
  * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -35,7 +35,7 @@
  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  */
 
 #include "nrf_sdh_freertos.h"
@@ -60,14 +60,12 @@ static nrf_sdh_freertos_task_hook_t m_task_hook;        //!< A hook function run
 
 void SD_EVT_IRQHandler(void)
 {
-     BaseType_t xYieldRequired;
+    BaseType_t yield_req = pdFALSE;
 
-     xYieldRequired = xTaskResumeFromISR( m_softdevice_task );
+    vTaskNotifyGiveFromISR(m_softdevice_task, &yield_req);
 
-     if( xYieldRequired == pdTRUE )
-     {
-         portYIELD_FROM_ISR(xYieldRequired);
-     }
+    /* Switch the task if required. */
+    portYIELD_FROM_ISR(yield_req);
 }
 
 
@@ -83,8 +81,10 @@ static void softdevice_task(void * pvParameter)
 
     while (true)
     {
-        nrf_sdh_evts_poll(); // Let the handlers run first, in case the EVENT occured before creating this task.
-        vTaskSuspend(NULL);
+        nrf_sdh_evts_poll();                    /* let the handlers run first, incase the EVENT occured before creating this task */
+
+        (void) ulTaskNotifyTake(pdTRUE,         /* Clear the notification value before exiting (equivalent to the binary semaphore). */
+                                portMAX_DELAY); /* Block indefinitely (INCLUDE_vTaskSuspend has to be enabled).*/
     }
 }
 

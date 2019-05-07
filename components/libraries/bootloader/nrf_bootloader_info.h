@@ -1,30 +1,30 @@
 /**
- * Copyright (c) 2016 - 2018, Nordic Semiconductor ASA
- * 
+ * Copyright (c) 2016 - 2019, Nordic Semiconductor ASA
+ *
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form, except as embedded into a Nordic
  *    Semiconductor ASA integrated circuit in a product or a software update for
  *    such product, must reproduce the above copyright notice, this list of
  *    conditions and the following disclaimer in the documentation and/or other
  *    materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
- * 
+ *
  * 4. This software, with or without modification, must only be used with a
  *    Nordic Semiconductor ASA integrated circuit.
- * 
+ *
  * 5. Any software provided in binary form under this license must not be reverse
  *    engineered, decompiled, modified and/or disassembled.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
  * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -35,7 +35,7 @@
  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  */
 /**@file
  *
@@ -75,24 +75,22 @@ extern "C" {
 /** @brief Macro for getting the size of the bootloader image.
  */
 #ifndef BOOTLOADER_SIZE
-#if defined ( NRF51 )
+#if (__LINT__ == 1)
+    #define BOOTLOADER_SIZE        (0x6000)
+#elif defined ( NRF51 )
     #define BOOTLOADER_SIZE (BOOTLOADER_SETTINGS_ADDRESS - BOOTLOADER_START_ADDR)
 #elif defined( NRF52_SERIES )
     #define BOOTLOADER_SIZE (NRF_MBR_PARAMS_PAGE_ADDRESS - BOOTLOADER_START_ADDR)
-#elif (__LINT__ == 1)
-    #define BOOTLOADER_SIZE        (0x6000)
 #endif
 #endif
 
 
 /**
- * @brief Bootloader start address in UICR.
+ * @brief Location of the pointer to the start of the bootloader.
  *
- * Register location in UICR where the bootloader start address is stored.
- *
- * @note If the value at the given location is 0xFFFFFFFF, the bootloader address is not set.
+ * See also @c BOOTLOADER_ADDRESS in @c app_util.h.
  */
-#define NRF_UICR_BOOTLOADER_START_ADDRESS       (NRF_UICR_BASE + 0x14)
+#define NRF_UICR_BOOTLOADER_START_ADDRESS       (MBR_BOOTLOADER_ADDR)
 
 
 // The following macros are for accessing the SoftDevice information structure,
@@ -110,7 +108,7 @@ extern "C" {
 #define SD_OFFSET_GET_UINT8(baseaddr, offset)  (*((uint8_t *)  SD_INFO_ABS_OFFSET_GET(baseaddr, offset)))
 
 
-#ifdef BLE_STACK_SUPPORT_REQD
+#if defined(BLE_STACK_SUPPORT_REQD) || defined(ANT_STACK_SUPPORT_REQD)
 #include "nrf_sdm.h"
 #else
 /** @brief The offset inside the SoftDevice at which the information struct is placed.
@@ -168,17 +166,28 @@ extern "C" {
 #define SD_MAJOR_VERSION_EXTRACT(raw_version) ((raw_version)/SD_MAJOR_VERSION_MULTIPLIER)
 
 
-#define BOOTLOADER_DFU_GPREGRET_MASK            (0xB0)      /**< Magic pattern written to GPREGRET register to signal between main app and DFU. The 3 lower bits are assumed to be used for signalling purposes.*/
+#define BOOTLOADER_DFU_GPREGRET_MASK            (0xF8)      /**< Mask for GPGPREGRET bits used for the magic pattern written to GPREGRET register to signal between main app and DFU. */
+#define BOOTLOADER_DFU_GPREGRET                 (0xB0)      /**< Magic pattern written to GPREGRET register to signal between main app and DFU. The 3 lower bits are assumed to be used for signalling purposes.*/
 #define BOOTLOADER_DFU_START_BIT_MASK           (0x01)      /**< Bit mask to signal from main application to enter DFU mode using a buttonless service. */
 
-#define BOOTLOADER_DFU_GPREGRET2_MASK           (0xA8)      /**< Magic pattern written to GPREGRET2 register to signal between main app and DFU. The 3 lower bits are assumed to be used for signalling purposes.*/
+#define BOOTLOADER_DFU_GPREGRET2_MASK           (0xF8)      /**< Mask for GPGPREGRET2 bits used for the magic pattern written to GPREGRET2 register to signal between main app and DFU. */
+#define BOOTLOADER_DFU_GPREGRET2                (0xA8)      /**< Magic pattern written to GPREGRET2 register to signal between main app and DFU. The 3 lower bits are assumed to be used for signalling purposes.*/
 #define BOOTLOADER_DFU_SKIP_CRC_BIT_MASK        (0x01)      /**< Bit mask to signal from main application that CRC-check is not needed for image verification. */
 
 
-#define BOOTLOADER_DFU_START    (BOOTLOADER_DFU_GPREGRET_MASK | BOOTLOADER_DFU_START_BIT_MASK)      /**< Magic number to signal that bootloader should enter DFU mode because of signal from Buttonless DFU in main app.*/
-#define BOOTLOADER_DFU_SKIP_CRC (BOOTLOADER_DFU_GPREGRET2_MASK | BOOTLOADER_DFU_SKIP_CRC_BIT_MASK)  /**< Magic number to signal that CRC can be skipped due to low power modes.*/
+#define BOOTLOADER_DFU_START    (BOOTLOADER_DFU_GPREGRET | BOOTLOADER_DFU_START_BIT_MASK)      /**< Magic number to signal that bootloader should enter DFU mode because of signal from Buttonless DFU in main app.*/
+#define BOOTLOADER_DFU_SKIP_CRC (BOOTLOADER_DFU_GPREGRET2 | BOOTLOADER_DFU_SKIP_CRC_BIT_MASK)  /**< Magic number to signal that CRC can be skipped due to low power modes.*/
 
 
+/** @brief Macro based on @c NRF_DFU_DEBUG_VERSION that can be checked for true/false instead of defined/not defined.
+ */
+#ifndef NRF_DFU_DEBUG
+#ifdef NRF_DFU_DEBUG_VERSION
+#define NRF_DFU_DEBUG 1
+#else
+#define NRF_DFU_DEBUG 0
+#endif
+#endif
 
 #ifdef __cplusplus
 }

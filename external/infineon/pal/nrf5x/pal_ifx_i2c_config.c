@@ -1,12 +1,26 @@
 /**
-* \copyright
-* Copyright(c) 2018, Infineon Technologies AG
-* All rights reserved.
+* MIT License
 *
-* This software is provided with terms and conditions as specified in OPTIGA(RM) Trust X Evaluation Kit License Agreement.
-* \endcopyright
+* Copyright (c) 2018 Infineon Technologies AG
 *
-* \author Infineon AG
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE
+*
 *
 * \file
 *
@@ -21,15 +35,16 @@
  *********************************************************************************************************************/
 #include "stdlib.h"
 #include "stdio.h"
-#include "pal_gpio.h"
-#include "pal_i2c.h"
-#include "ifx_i2c_config.h"
+#include "optiga/pal/pal_gpio.h"
+#include "optiga/pal/pal_i2c.h"
+#include "optiga/ifx_i2c/ifx_i2c_config.h"
+#include "boards.h"
 
 /*********************************************************************************************************************
  * pal ifx i2c instance
  *********************************************************************************************************************/
 /**
- * \brief PAL I2C configuration for OPTIGA. 
+ * \brief PAL I2C configuration for OPTIGA.
  */
 pal_i2c_t optiga_pal_i2c_context_0 =
 {
@@ -44,15 +59,15 @@ pal_i2c_t optiga_pal_i2c_context_0 =
 };
 
 /*********************************************************************************************************************
- * PAL GPIO configurations defined for XMC4500
+ * PAL GPIO configurations defined for nrf52 development boards PCA10040 and PCA10056 with the Trust X Shield
  *********************************************************************************************************************/
 /**
-* \brief PAL vdd pin configuration for OPTIGA. 
+* \brief PAL vdd pin configuration for OPTIGA.
  */
 pal_gpio_t optiga_vdd_0 =
 {
     // Platform specific GPIO context for the pin used to toggle Vdd.
-    (void*)NULL
+    (void*)ARDUINO_9_PIN  // Power pin for the onboard OPTIGA
 };
 
 /**
@@ -61,7 +76,7 @@ pal_gpio_t optiga_vdd_0 =
 pal_gpio_t optiga_reset_0 =
 {
     // Platform specific GPIO context for the pin used to toggle Reset.
-    (void*)18
+    (void*)ARDUINO_7_PIN
 };
 
 

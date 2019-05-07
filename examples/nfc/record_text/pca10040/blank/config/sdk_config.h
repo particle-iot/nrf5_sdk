@@ -1,30 +1,30 @@
 /**
- * Copyright (c) 2017 - 2018, Nordic Semiconductor ASA
- * 
+ * Copyright (c) 2017 - 2019, Nordic Semiconductor ASA
+ *
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form, except as embedded into a Nordic
  *    Semiconductor ASA integrated circuit in a product or a software update for
  *    such product, must reproduce the above copyright notice, this list of
  *    conditions and the following disclaimer in the documentation and/or other
  *    materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
- * 
+ *
  * 4. This software, with or without modification, must only be used with a
  *    Nordic Semiconductor ASA integrated circuit.
- * 
+ *
  * 5. Any software provided in binary form under this license must not be reverse
  *    engineered, decompiled, modified and/or disassembled.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
  * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -35,7 +35,7 @@
  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  */
 
 
@@ -49,40 +49,6 @@
 // <h> nRF_Drivers 
 
 //==========================================================
-// <e> CLOCK_ENABLED - nrf_drv_clock - CLOCK peripheral driver - legacy layer
-//==========================================================
-#ifndef CLOCK_ENABLED
-#define CLOCK_ENABLED 1
-#endif
-// <o> CLOCK_CONFIG_LF_SRC  - LF Clock Source
- 
-// <0=> RC 
-// <1=> XTAL 
-// <2=> Synth 
-
-#ifndef CLOCK_CONFIG_LF_SRC
-#define CLOCK_CONFIG_LF_SRC 1
-#endif
-
-// <o> CLOCK_CONFIG_IRQ_PRIORITY  - Interrupt priority
- 
-
-// <i> Priorities 0,2 (nRF51) and 0,1,4,5 (nRF52) are reserved for SoftDevice
-// <0=> 0 (highest) 
-// <1=> 1 
-// <2=> 2 
-// <3=> 3 
-// <4=> 4 
-// <5=> 5 
-// <6=> 6 
-// <7=> 7 
-
-#ifndef CLOCK_CONFIG_IRQ_PRIORITY
-#define CLOCK_CONFIG_IRQ_PRIORITY 7
-#endif
-
-// </e>
-
 // <e> NRFX_CLOCK_ENABLED - nrfx_clock - CLOCK peripheral driver
 //==========================================================
 #ifndef NRFX_CLOCK_ENABLED
@@ -93,6 +59,8 @@
 // <0=> RC 
 // <1=> XTAL 
 // <2=> Synth 
+// <131073=> External Low Swing 
+// <196609=> External Full Swing 
 
 #ifndef NRFX_CLOCK_CONFIG_LF_SRC
 #define NRFX_CLOCK_CONFIG_LF_SRC 1
@@ -110,7 +78,7 @@
 // <7=> 7 
 
 #ifndef NRFX_CLOCK_CONFIG_IRQ_PRIORITY
-#define NRFX_CLOCK_CONFIG_IRQ_PRIORITY 7
+#define NRFX_CLOCK_CONFIG_IRQ_PRIORITY 6
 #endif
 
 // <e> NRFX_CLOCK_CONFIG_LOG_ENABLED - Enables logging in the module.
@@ -160,6 +128,79 @@
 
 #ifndef NRFX_CLOCK_CONFIG_DEBUG_COLOR
 #define NRFX_CLOCK_CONFIG_DEBUG_COLOR 0
+#endif
+
+// </e>
+
+// </e>
+
+// <e> NRFX_NFCT_ENABLED - nrfx_nfct - NFCT peripheral driver
+//==========================================================
+#ifndef NRFX_NFCT_ENABLED
+#define NRFX_NFCT_ENABLED 1
+#endif
+// <o> NRFX_NFCT_CONFIG_IRQ_PRIORITY  - Interrupt priority
+ 
+// <0=> 0 (highest) 
+// <1=> 1 
+// <2=> 2 
+// <3=> 3 
+// <4=> 4 
+// <5=> 5 
+// <6=> 6 
+// <7=> 7 
+
+#ifndef NRFX_NFCT_CONFIG_IRQ_PRIORITY
+#define NRFX_NFCT_CONFIG_IRQ_PRIORITY 6
+#endif
+
+// <e> NRFX_NFCT_CONFIG_LOG_ENABLED - Enables logging in the module.
+//==========================================================
+#ifndef NRFX_NFCT_CONFIG_LOG_ENABLED
+#define NRFX_NFCT_CONFIG_LOG_ENABLED 0
+#endif
+// <o> NRFX_NFCT_CONFIG_LOG_LEVEL  - Default Severity level
+ 
+// <0=> Off 
+// <1=> Error 
+// <2=> Warning 
+// <3=> Info 
+// <4=> Debug 
+
+#ifndef NRFX_NFCT_CONFIG_LOG_LEVEL
+#define NRFX_NFCT_CONFIG_LOG_LEVEL 3
+#endif
+
+// <o> NRFX_NFCT_CONFIG_INFO_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef NRFX_NFCT_CONFIG_INFO_COLOR
+#define NRFX_NFCT_CONFIG_INFO_COLOR 0
+#endif
+
+// <o> NRFX_NFCT_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef NRFX_NFCT_CONFIG_DEBUG_COLOR
+#define NRFX_NFCT_CONFIG_DEBUG_COLOR 0
 #endif
 
 // </e>
@@ -259,6 +300,151 @@
 
 // </e>
 
+// <e> NRFX_TIMER_ENABLED - nrfx_timer - TIMER periperal driver
+//==========================================================
+#ifndef NRFX_TIMER_ENABLED
+#define NRFX_TIMER_ENABLED 1
+#endif
+// <q> NRFX_TIMER0_ENABLED  - Enable TIMER0 instance
+ 
+
+#ifndef NRFX_TIMER0_ENABLED
+#define NRFX_TIMER0_ENABLED 0
+#endif
+
+// <q> NRFX_TIMER1_ENABLED  - Enable TIMER1 instance
+ 
+
+#ifndef NRFX_TIMER1_ENABLED
+#define NRFX_TIMER1_ENABLED 0
+#endif
+
+// <q> NRFX_TIMER2_ENABLED  - Enable TIMER2 instance
+ 
+
+#ifndef NRFX_TIMER2_ENABLED
+#define NRFX_TIMER2_ENABLED 0
+#endif
+
+// <q> NRFX_TIMER3_ENABLED  - Enable TIMER3 instance
+ 
+
+#ifndef NRFX_TIMER3_ENABLED
+#define NRFX_TIMER3_ENABLED 0
+#endif
+
+// <q> NRFX_TIMER4_ENABLED  - Enable TIMER4 instance
+ 
+
+#ifndef NRFX_TIMER4_ENABLED
+#define NRFX_TIMER4_ENABLED 1
+#endif
+
+// <o> NRFX_TIMER_DEFAULT_CONFIG_FREQUENCY  - Timer frequency if in Timer mode
+ 
+// <0=> 16 MHz 
+// <1=> 8 MHz 
+// <2=> 4 MHz 
+// <3=> 2 MHz 
+// <4=> 1 MHz 
+// <5=> 500 kHz 
+// <6=> 250 kHz 
+// <7=> 125 kHz 
+// <8=> 62.5 kHz 
+// <9=> 31.25 kHz 
+
+#ifndef NRFX_TIMER_DEFAULT_CONFIG_FREQUENCY
+#define NRFX_TIMER_DEFAULT_CONFIG_FREQUENCY 0
+#endif
+
+// <o> NRFX_TIMER_DEFAULT_CONFIG_MODE  - Timer mode or operation
+ 
+// <0=> Timer 
+// <1=> Counter 
+
+#ifndef NRFX_TIMER_DEFAULT_CONFIG_MODE
+#define NRFX_TIMER_DEFAULT_CONFIG_MODE 0
+#endif
+
+// <o> NRFX_TIMER_DEFAULT_CONFIG_BIT_WIDTH  - Timer counter bit width
+ 
+// <0=> 16 bit 
+// <1=> 8 bit 
+// <2=> 24 bit 
+// <3=> 32 bit 
+
+#ifndef NRFX_TIMER_DEFAULT_CONFIG_BIT_WIDTH
+#define NRFX_TIMER_DEFAULT_CONFIG_BIT_WIDTH 0
+#endif
+
+// <o> NRFX_TIMER_DEFAULT_CONFIG_IRQ_PRIORITY  - Interrupt priority
+ 
+// <0=> 0 (highest) 
+// <1=> 1 
+// <2=> 2 
+// <3=> 3 
+// <4=> 4 
+// <5=> 5 
+// <6=> 6 
+// <7=> 7 
+
+#ifndef NRFX_TIMER_DEFAULT_CONFIG_IRQ_PRIORITY
+#define NRFX_TIMER_DEFAULT_CONFIG_IRQ_PRIORITY 6
+#endif
+
+// <e> NRFX_TIMER_CONFIG_LOG_ENABLED - Enables logging in the module.
+//==========================================================
+#ifndef NRFX_TIMER_CONFIG_LOG_ENABLED
+#define NRFX_TIMER_CONFIG_LOG_ENABLED 0
+#endif
+// <o> NRFX_TIMER_CONFIG_LOG_LEVEL  - Default Severity level
+ 
+// <0=> Off 
+// <1=> Error 
+// <2=> Warning 
+// <3=> Info 
+// <4=> Debug 
+
+#ifndef NRFX_TIMER_CONFIG_LOG_LEVEL
+#define NRFX_TIMER_CONFIG_LOG_LEVEL 3
+#endif
+
+// <o> NRFX_TIMER_CONFIG_INFO_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef NRFX_TIMER_CONFIG_INFO_COLOR
+#define NRFX_TIMER_CONFIG_INFO_COLOR 0
+#endif
+
+// <o> NRFX_TIMER_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef NRFX_TIMER_CONFIG_DEBUG_COLOR
+#define NRFX_TIMER_CONFIG_DEBUG_COLOR 0
+#endif
+
+// </e>
+
+// </e>
+
 // <e> NRFX_UARTE_ENABLED - nrfx_uarte - UARTE peripheral driver
 //==========================================================
 #ifndef NRFX_UARTE_ENABLED
@@ -324,7 +510,7 @@
 // <7=> 7 
 
 #ifndef NRFX_UARTE_DEFAULT_CONFIG_IRQ_PRIORITY
-#define NRFX_UARTE_DEFAULT_CONFIG_IRQ_PRIORITY 7
+#define NRFX_UARTE_DEFAULT_CONFIG_IRQ_PRIORITY 6
 #endif
 
 // <e> NRFX_UARTE_CONFIG_LOG_ENABLED - Enables logging in the module.
@@ -445,7 +631,7 @@
 // <7=> 7 
 
 #ifndef NRFX_UART_DEFAULT_CONFIG_IRQ_PRIORITY
-#define NRFX_UART_DEFAULT_CONFIG_IRQ_PRIORITY 7
+#define NRFX_UART_DEFAULT_CONFIG_IRQ_PRIORITY 6
 #endif
 
 // <e> NRFX_UART_CONFIG_LOG_ENABLED - Enables logging in the module.
@@ -498,6 +684,49 @@
 #endif
 
 // </e>
+
+// </e>
+
+// <e> NRF_CLOCK_ENABLED - nrf_drv_clock - CLOCK peripheral driver - legacy layer
+//==========================================================
+#ifndef NRF_CLOCK_ENABLED
+#define NRF_CLOCK_ENABLED 1
+#endif
+// <o> CLOCK_CONFIG_LF_SRC  - LF Clock Source
+ 
+// <0=> RC 
+// <1=> XTAL 
+// <2=> Synth 
+// <131073=> External Low Swing 
+// <196609=> External Full Swing 
+
+#ifndef CLOCK_CONFIG_LF_SRC
+#define CLOCK_CONFIG_LF_SRC 1
+#endif
+
+// <q> CLOCK_CONFIG_LF_CAL_ENABLED  - Calibration enable for LF Clock Source
+ 
+
+#ifndef CLOCK_CONFIG_LF_CAL_ENABLED
+#define CLOCK_CONFIG_LF_CAL_ENABLED 0
+#endif
+
+// <o> CLOCK_CONFIG_IRQ_PRIORITY  - Interrupt priority
+ 
+
+// <i> Priorities 0,2 (nRF51) and 0,1,4,5 (nRF52) are reserved for SoftDevice
+// <0=> 0 (highest) 
+// <1=> 1 
+// <2=> 2 
+// <3=> 3 
+// <4=> 4 
+// <5=> 5 
+// <6=> 6 
+// <7=> 7 
+
+#ifndef CLOCK_CONFIG_IRQ_PRIORITY
+#define CLOCK_CONFIG_IRQ_PRIORITY 6
+#endif
 
 // </e>
 
@@ -561,7 +790,7 @@
 // <7=> 7 
 
 #ifndef UART_DEFAULT_CONFIG_IRQ_PRIORITY
-#define UART_DEFAULT_CONFIG_IRQ_PRIORITY 7
+#define UART_DEFAULT_CONFIG_IRQ_PRIORITY 6
 #endif
 
 // <q> UART_EASY_DMA_SUPPORT  - Driver supporting EasyDMA
@@ -622,27 +851,12 @@
 
 // </e>
 
-// <e> HARDFAULT_HANDLER_ENABLED - hardfault_default - HardFault default handler for debugging and release
-//==========================================================
+// <q> HARDFAULT_HANDLER_ENABLED  - hardfault_default - HardFault default handler for debugging and release
+ 
+
 #ifndef HARDFAULT_HANDLER_ENABLED
 #define HARDFAULT_HANDLER_ENABLED 1
 #endif
-// <q> HARDFAULT_HANDLER_GDB_PSP_BACKTRACE  - Bypass the GDB problem with multiple stack pointers backtrace
- 
-
-// <i> There is a known bug in GDB which causes it to incorrectly backtrace the code
-// <i> when multiple stack pointers are used (main and process stack pointers).
-// <i> This option enables the fix for that problem and allows to see the proper backtrace info.
-// <i> It makes it possible to trace the code to the exact point where a HardFault appeared.
-// <i> This option requires additional commands and may temporarily switch MSP stack to store data on PSP space.
-// <i> This is an optional parameter - enable it while debugging.
-// <i> Before a HardFault handler exits, the stack will be reverted to its previous value.
-
-#ifndef HARDFAULT_HANDLER_GDB_PSP_BACKTRACE
-#define HARDFAULT_HANDLER_GDB_PSP_BACKTRACE 1
-#endif
-
-// </e>
 
 // <e> NRF_BALLOC_ENABLED - nrf_balloc - Block allocator module
 //==========================================================
@@ -700,13 +914,6 @@
 
 // </e>
 
-// <q> NRF_FPRINTF_ENABLED  - nrf_fprintf - fprintf function.
- 
-
-#ifndef NRF_FPRINTF_ENABLED
-#define NRF_FPRINTF_ENABLED 1
-#endif
-
 // <q> NRF_MEMOBJ_ENABLED  - nrf_memobj - Linked memory allocator module
  
 
@@ -720,6 +927,26 @@
 #ifndef NRF_STRERROR_ENABLED
 #define NRF_STRERROR_ENABLED 1
 #endif
+
+// <h> nrf_fprintf - fprintf function.
+
+//==========================================================
+// <q> NRF_FPRINTF_ENABLED  - Enable/disable fprintf module.
+ 
+
+#ifndef NRF_FPRINTF_ENABLED
+#define NRF_FPRINTF_ENABLED 1
+#endif
+
+// <q> NRF_FPRINTF_FLAG_AUTOMATIC_CR_ON_LF_ENABLED  - For each printed LF, function will add CR.
+ 
+
+#ifndef NRF_FPRINTF_FLAG_AUTOMATIC_CR_ON_LF_ENABLED
+#define NRF_FPRINTF_FLAG_AUTOMATIC_CR_ON_LF_ENABLED 1
+#endif
+
+// </h> 
+//==========================================================
 
 // </h> 
 //==========================================================
@@ -805,21 +1032,128 @@
 
 // </e>
 
-// <q> NRF_LOG_STR_FORMATTER_TIMESTAMP_FORMAT_ENABLED  - nrf_log_str_formatter - Log string formatter
- 
-
-#ifndef NRF_LOG_STR_FORMATTER_TIMESTAMP_FORMAT_ENABLED
-#define NRF_LOG_STR_FORMATTER_TIMESTAMP_FORMAT_ENABLED 1
-#endif
-
-// <h> nrf_log - Logger
-
-//==========================================================
-// <e> NRF_LOG_ENABLED - Logging module for nRF5 SDK
+// <e> NRF_LOG_ENABLED - nrf_log - Logger
 //==========================================================
 #ifndef NRF_LOG_ENABLED
 #define NRF_LOG_ENABLED 1
 #endif
+// <h> Log message pool - Configuration of log message pool
+
+//==========================================================
+// <o> NRF_LOG_MSGPOOL_ELEMENT_SIZE - Size of a single element in the pool of memory objects. 
+// <i> If a small value is set, then performance of logs processing
+// <i> is degraded because data is fragmented. Bigger value impacts
+// <i> RAM memory utilization. The size is set to fit a message with
+// <i> a timestamp and up to 2 arguments in a single memory object.
+
+#ifndef NRF_LOG_MSGPOOL_ELEMENT_SIZE
+#define NRF_LOG_MSGPOOL_ELEMENT_SIZE 20
+#endif
+
+// <o> NRF_LOG_MSGPOOL_ELEMENT_COUNT - Number of elements in the pool of memory objects 
+// <i> If a small value is set, then it may lead to a deadlock
+// <i> in certain cases if backend has high latency and holds
+// <i> multiple messages for long time. Bigger value impacts
+// <i> RAM memory usage.
+
+#ifndef NRF_LOG_MSGPOOL_ELEMENT_COUNT
+#define NRF_LOG_MSGPOOL_ELEMENT_COUNT 8
+#endif
+
+// </h> 
+//==========================================================
+
+// <q> NRF_LOG_ALLOW_OVERFLOW  - Configures behavior when circular buffer is full.
+ 
+
+// <i> If set then oldest logs are overwritten. Otherwise a 
+// <i> marker is injected informing about overflow.
+
+#ifndef NRF_LOG_ALLOW_OVERFLOW
+#define NRF_LOG_ALLOW_OVERFLOW 1
+#endif
+
+// <o> NRF_LOG_BUFSIZE  - Size of the buffer for storing logs (in bytes).
+ 
+
+// <i> Must be power of 2 and multiple of 4.
+// <i> If NRF_LOG_DEFERRED = 0 then buffer size can be reduced to minimum.
+// <128=> 128 
+// <256=> 256 
+// <512=> 512 
+// <1024=> 1024 
+// <2048=> 2048 
+// <4096=> 4096 
+// <8192=> 8192 
+// <16384=> 16384 
+
+#ifndef NRF_LOG_BUFSIZE
+#define NRF_LOG_BUFSIZE 1024
+#endif
+
+// <q> NRF_LOG_CLI_CMDS  - Enable CLI commands for the module.
+ 
+
+#ifndef NRF_LOG_CLI_CMDS
+#define NRF_LOG_CLI_CMDS 0
+#endif
+
+// <o> NRF_LOG_DEFAULT_LEVEL  - Default Severity level
+ 
+// <0=> Off 
+// <1=> Error 
+// <2=> Warning 
+// <3=> Info 
+// <4=> Debug 
+
+#ifndef NRF_LOG_DEFAULT_LEVEL
+#define NRF_LOG_DEFAULT_LEVEL 3
+#endif
+
+// <q> NRF_LOG_DEFERRED  - Enable deffered logger.
+ 
+
+// <i> Log data is buffered and can be processed in idle.
+
+#ifndef NRF_LOG_DEFERRED
+#define NRF_LOG_DEFERRED 1
+#endif
+
+// <q> NRF_LOG_FILTERS_ENABLED  - Enable dynamic filtering of logs.
+ 
+
+#ifndef NRF_LOG_FILTERS_ENABLED
+#define NRF_LOG_FILTERS_ENABLED 0
+#endif
+
+// <o> NRF_LOG_STR_PUSH_BUFFER_SIZE  - Size of the buffer dedicated for strings stored using @ref NRF_LOG_PUSH.
+ 
+// <16=> 16 
+// <32=> 32 
+// <64=> 64 
+// <128=> 128 
+// <256=> 256 
+// <512=> 512 
+// <1024=> 1024 
+
+#ifndef NRF_LOG_STR_PUSH_BUFFER_SIZE
+#define NRF_LOG_STR_PUSH_BUFFER_SIZE 128
+#endif
+
+// <o> NRF_LOG_STR_PUSH_BUFFER_SIZE  - Size of the buffer dedicated for strings stored using @ref NRF_LOG_PUSH.
+ 
+// <16=> 16 
+// <32=> 32 
+// <64=> 64 
+// <128=> 128 
+// <256=> 256 
+// <512=> 512 
+// <1024=> 1024 
+
+#ifndef NRF_LOG_STR_PUSH_BUFFER_SIZE
+#define NRF_LOG_STR_PUSH_BUFFER_SIZE 128
+#endif
+
 // <e> NRF_LOG_USES_COLORS - If enabled then ANSI escape code for colors is prefixed to every string
 //==========================================================
 #ifndef NRF_LOG_USES_COLORS
@@ -875,55 +1209,6 @@
 
 // </e>
 
-// <o> NRF_LOG_DEFAULT_LEVEL  - Default Severity level
- 
-// <0=> Off 
-// <1=> Error 
-// <2=> Warning 
-// <3=> Info 
-// <4=> Debug 
-
-#ifndef NRF_LOG_DEFAULT_LEVEL
-#define NRF_LOG_DEFAULT_LEVEL 3
-#endif
-
-// <q> NRF_LOG_DEFERRED  - Enable deffered logger.
- 
-
-// <i> Log data is buffered and can be processed in idle.
-
-#ifndef NRF_LOG_DEFERRED
-#define NRF_LOG_DEFERRED 1
-#endif
-
-// <o> NRF_LOG_BUFSIZE  - Size of the buffer for storing logs (in bytes).
- 
-
-// <i> Must be power of 2 and multiple of 4.
-// <i> If NRF_LOG_DEFERRED = 0 then buffer size can be reduced to minimum.
-// <128=> 128 
-// <256=> 256 
-// <512=> 512 
-// <1024=> 1024 
-// <2048=> 2048 
-// <4096=> 4096 
-// <8192=> 8192 
-// <16384=> 16384 
-
-#ifndef NRF_LOG_BUFSIZE
-#define NRF_LOG_BUFSIZE 1024
-#endif
-
-// <q> NRF_LOG_ALLOW_OVERFLOW  - Configures behavior when circular buffer is full.
- 
-
-// <i> If set then oldest logs are overwritten. Otherwise a 
-// <i> marker is injected informing about overflow.
-
-#ifndef NRF_LOG_ALLOW_OVERFLOW
-#define NRF_LOG_ALLOW_OVERFLOW 1
-#endif
-
 // <e> NRF_LOG_USES_TIMESTAMP - Enable timestamping
 
 // <i> Function for getting the timestamp is provided by the user
@@ -931,52 +1216,10 @@
 #ifndef NRF_LOG_USES_TIMESTAMP
 #define NRF_LOG_USES_TIMESTAMP 0
 #endif
-// <o> NRF_LOG_TIMESTAMP_DEFAULT_FREQUENCY - Default frequency of the timestamp (in Hz) 
+// <o> NRF_LOG_TIMESTAMP_DEFAULT_FREQUENCY - Default frequency of the timestamp (in Hz) or 0 to use app_timer frequency. 
 #ifndef NRF_LOG_TIMESTAMP_DEFAULT_FREQUENCY
-#define NRF_LOG_TIMESTAMP_DEFAULT_FREQUENCY 32768
+#define NRF_LOG_TIMESTAMP_DEFAULT_FREQUENCY 0
 #endif
-
-// </e>
-
-// <q> NRF_LOG_FILTERS_ENABLED  - Enable dynamic filtering of logs.
- 
-
-#ifndef NRF_LOG_FILTERS_ENABLED
-#define NRF_LOG_FILTERS_ENABLED 0
-#endif
-
-// <q> NRF_LOG_CLI_CMDS  - Enable CLI commands for the module.
- 
-
-#ifndef NRF_LOG_CLI_CMDS
-#define NRF_LOG_CLI_CMDS 0
-#endif
-
-// <h> Log message pool - Configuration of log message pool
-
-//==========================================================
-// <o> NRF_LOG_MSGPOOL_ELEMENT_SIZE - Size of a single element in the pool of memory objects. 
-// <i> If a small value is set, then performance of logs processing
-// <i> is degraded because data is fragmented. Bigger value impacts
-// <i> RAM memory utilization. The size is set to fit a message with
-// <i> a timestamp and up to 2 arguments in a single memory object.
-
-#ifndef NRF_LOG_MSGPOOL_ELEMENT_SIZE
-#define NRF_LOG_MSGPOOL_ELEMENT_SIZE 20
-#endif
-
-// <o> NRF_LOG_MSGPOOL_ELEMENT_COUNT - Number of elements in the pool of memory objects 
-// <i> If a small value is set, then it may lead to a deadlock
-// <i> in certain cases if backend has high latency and holds
-// <i> multiple messages for long time. Bigger value impacts
-// <i> RAM memory usage.
-
-#ifndef NRF_LOG_MSGPOOL_ELEMENT_COUNT
-#define NRF_LOG_MSGPOOL_ELEMENT_COUNT 8
-#endif
-
-// </h> 
-//==========================================================
 
 // </e>
 
@@ -986,12 +1229,12 @@
 // <h> nrf_log in nRF_Core 
 
 //==========================================================
-// <e> NRF_MPU_CONFIG_LOG_ENABLED - Enables logging in the module.
+// <e> NRF_MPU_LIB_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
-#ifndef NRF_MPU_CONFIG_LOG_ENABLED
-#define NRF_MPU_CONFIG_LOG_ENABLED 0
+#ifndef NRF_MPU_LIB_CONFIG_LOG_ENABLED
+#define NRF_MPU_LIB_CONFIG_LOG_ENABLED 0
 #endif
-// <o> NRF_MPU_CONFIG_LOG_LEVEL  - Default Severity level
+// <o> NRF_MPU_LIB_CONFIG_LOG_LEVEL  - Default Severity level
  
 // <0=> Off 
 // <1=> Error 
@@ -999,11 +1242,11 @@
 // <3=> Info 
 // <4=> Debug 
 
-#ifndef NRF_MPU_CONFIG_LOG_LEVEL
-#define NRF_MPU_CONFIG_LOG_LEVEL 3
+#ifndef NRF_MPU_LIB_CONFIG_LOG_LEVEL
+#define NRF_MPU_LIB_CONFIG_LOG_LEVEL 3
 #endif
 
-// <o> NRF_MPU_CONFIG_INFO_COLOR  - ANSI escape code prefix.
+// <o> NRF_MPU_LIB_CONFIG_INFO_COLOR  - ANSI escape code prefix.
  
 // <0=> Default 
 // <1=> Black 
@@ -1015,11 +1258,11 @@
 // <7=> Cyan 
 // <8=> White 
 
-#ifndef NRF_MPU_CONFIG_INFO_COLOR
-#define NRF_MPU_CONFIG_INFO_COLOR 0
+#ifndef NRF_MPU_LIB_CONFIG_INFO_COLOR
+#define NRF_MPU_LIB_CONFIG_INFO_COLOR 0
 #endif
 
-// <o> NRF_MPU_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
+// <o> NRF_MPU_LIB_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
  
 // <0=> Default 
 // <1=> Black 
@@ -1031,8 +1274,8 @@
 // <7=> Cyan 
 // <8=> White 
 
-#ifndef NRF_MPU_CONFIG_DEBUG_COLOR
-#define NRF_MPU_CONFIG_DEBUG_COLOR 0
+#ifndef NRF_MPU_LIB_CONFIG_DEBUG_COLOR
+#define NRF_MPU_LIB_CONFIG_DEBUG_COLOR 0
 #endif
 
 // </e>
@@ -1345,6 +1588,108 @@
 
 #ifndef LPCOMP_CONFIG_DEBUG_COLOR
 #define LPCOMP_CONFIG_DEBUG_COLOR 0
+#endif
+
+// </e>
+
+// <e> MAX3421E_HOST_CONFIG_LOG_ENABLED - Enable logging in the module
+//==========================================================
+#ifndef MAX3421E_HOST_CONFIG_LOG_ENABLED
+#define MAX3421E_HOST_CONFIG_LOG_ENABLED 0
+#endif
+// <o> MAX3421E_HOST_CONFIG_LOG_LEVEL  - Default Severity level
+ 
+// <0=> Off 
+// <1=> Error 
+// <2=> Warning 
+// <3=> Info 
+// <4=> Debug 
+
+#ifndef MAX3421E_HOST_CONFIG_LOG_LEVEL
+#define MAX3421E_HOST_CONFIG_LOG_LEVEL 3
+#endif
+
+// <o> MAX3421E_HOST_CONFIG_INFO_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef MAX3421E_HOST_CONFIG_INFO_COLOR
+#define MAX3421E_HOST_CONFIG_INFO_COLOR 0
+#endif
+
+// <o> MAX3421E_HOST_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef MAX3421E_HOST_CONFIG_DEBUG_COLOR
+#define MAX3421E_HOST_CONFIG_DEBUG_COLOR 0
+#endif
+
+// </e>
+
+// <e> NRFX_USBD_CONFIG_LOG_ENABLED - Enable logging in the module
+//==========================================================
+#ifndef NRFX_USBD_CONFIG_LOG_ENABLED
+#define NRFX_USBD_CONFIG_LOG_ENABLED 0
+#endif
+// <o> NRFX_USBD_CONFIG_LOG_LEVEL  - Default Severity level
+ 
+// <0=> Off 
+// <1=> Error 
+// <2=> Warning 
+// <3=> Info 
+// <4=> Debug 
+
+#ifndef NRFX_USBD_CONFIG_LOG_LEVEL
+#define NRFX_USBD_CONFIG_LOG_LEVEL 3
+#endif
+
+// <o> NRFX_USBD_CONFIG_INFO_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef NRFX_USBD_CONFIG_INFO_COLOR
+#define NRFX_USBD_CONFIG_INFO_COLOR 0
+#endif
+
+// <o> NRFX_USBD_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef NRFX_USBD_CONFIG_DEBUG_COLOR
+#define NRFX_USBD_CONFIG_DEBUG_COLOR 0
 #endif
 
 // </e>
@@ -2245,6 +2590,57 @@
 
 // </e>
 
+// <e> APP_USBD_CONFIG_LOG_ENABLED - Enable logging in the module.
+//==========================================================
+#ifndef APP_USBD_CONFIG_LOG_ENABLED
+#define APP_USBD_CONFIG_LOG_ENABLED 0
+#endif
+// <o> APP_USBD_CONFIG_LOG_LEVEL  - Default Severity level
+ 
+// <0=> Off 
+// <1=> Error 
+// <2=> Warning 
+// <3=> Info 
+// <4=> Debug 
+
+#ifndef APP_USBD_CONFIG_LOG_LEVEL
+#define APP_USBD_CONFIG_LOG_LEVEL 3
+#endif
+
+// <o> APP_USBD_CONFIG_INFO_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef APP_USBD_CONFIG_INFO_COLOR
+#define APP_USBD_CONFIG_INFO_COLOR 0
+#endif
+
+// <o> APP_USBD_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef APP_USBD_CONFIG_DEBUG_COLOR
+#define APP_USBD_CONFIG_DEBUG_COLOR 0
+#endif
+
+// </e>
+
 // <e> APP_USBD_DUMMY_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
 #ifndef APP_USBD_DUMMY_CONFIG_LOG_ENABLED
@@ -2524,6 +2920,195 @@
 
 #ifndef NRF_BALLOC_CONFIG_DEBUG_COLOR
 #define NRF_BALLOC_CONFIG_DEBUG_COLOR 0
+#endif
+
+// </e>
+
+// <e> NRF_BLOCK_DEV_EMPTY_CONFIG_LOG_ENABLED - Enables logging in the module.
+//==========================================================
+#ifndef NRF_BLOCK_DEV_EMPTY_CONFIG_LOG_ENABLED
+#define NRF_BLOCK_DEV_EMPTY_CONFIG_LOG_ENABLED 0
+#endif
+// <o> NRF_BLOCK_DEV_EMPTY_CONFIG_LOG_LEVEL  - Default Severity level
+ 
+// <0=> Off 
+// <1=> Error 
+// <2=> Warning 
+// <3=> Info 
+// <4=> Debug 
+
+#ifndef NRF_BLOCK_DEV_EMPTY_CONFIG_LOG_LEVEL
+#define NRF_BLOCK_DEV_EMPTY_CONFIG_LOG_LEVEL 3
+#endif
+
+// <o> NRF_BLOCK_DEV_EMPTY_CONFIG_LOG_INIT_FILTER_LEVEL  - Initial severity level if dynamic filtering is enabled
+ 
+// <0=> Off 
+// <1=> Error 
+// <2=> Warning 
+// <3=> Info 
+// <4=> Debug 
+
+#ifndef NRF_BLOCK_DEV_EMPTY_CONFIG_LOG_INIT_FILTER_LEVEL
+#define NRF_BLOCK_DEV_EMPTY_CONFIG_LOG_INIT_FILTER_LEVEL 3
+#endif
+
+// <o> NRF_BLOCK_DEV_EMPTY_CONFIG_INFO_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef NRF_BLOCK_DEV_EMPTY_CONFIG_INFO_COLOR
+#define NRF_BLOCK_DEV_EMPTY_CONFIG_INFO_COLOR 0
+#endif
+
+// <o> NRF_BLOCK_DEV_EMPTY_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef NRF_BLOCK_DEV_EMPTY_CONFIG_DEBUG_COLOR
+#define NRF_BLOCK_DEV_EMPTY_CONFIG_DEBUG_COLOR 0
+#endif
+
+// </e>
+
+// <e> NRF_BLOCK_DEV_QSPI_CONFIG_LOG_ENABLED - Enables logging in the module.
+//==========================================================
+#ifndef NRF_BLOCK_DEV_QSPI_CONFIG_LOG_ENABLED
+#define NRF_BLOCK_DEV_QSPI_CONFIG_LOG_ENABLED 0
+#endif
+// <o> NRF_BLOCK_DEV_QSPI_CONFIG_LOG_LEVEL  - Default Severity level
+ 
+// <0=> Off 
+// <1=> Error 
+// <2=> Warning 
+// <3=> Info 
+// <4=> Debug 
+
+#ifndef NRF_BLOCK_DEV_QSPI_CONFIG_LOG_LEVEL
+#define NRF_BLOCK_DEV_QSPI_CONFIG_LOG_LEVEL 3
+#endif
+
+// <o> NRF_BLOCK_DEV_QSPI_CONFIG_LOG_INIT_FILTER_LEVEL  - Initial severity level if dynamic filtering is enabled
+ 
+// <0=> Off 
+// <1=> Error 
+// <2=> Warning 
+// <3=> Info 
+// <4=> Debug 
+
+#ifndef NRF_BLOCK_DEV_QSPI_CONFIG_LOG_INIT_FILTER_LEVEL
+#define NRF_BLOCK_DEV_QSPI_CONFIG_LOG_INIT_FILTER_LEVEL 3
+#endif
+
+// <o> NRF_BLOCK_DEV_QSPI_CONFIG_INFO_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef NRF_BLOCK_DEV_QSPI_CONFIG_INFO_COLOR
+#define NRF_BLOCK_DEV_QSPI_CONFIG_INFO_COLOR 0
+#endif
+
+// <o> NRF_BLOCK_DEV_QSPI_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef NRF_BLOCK_DEV_QSPI_CONFIG_DEBUG_COLOR
+#define NRF_BLOCK_DEV_QSPI_CONFIG_DEBUG_COLOR 0
+#endif
+
+// </e>
+
+// <e> NRF_BLOCK_DEV_RAM_CONFIG_LOG_ENABLED - Enables logging in the module.
+//==========================================================
+#ifndef NRF_BLOCK_DEV_RAM_CONFIG_LOG_ENABLED
+#define NRF_BLOCK_DEV_RAM_CONFIG_LOG_ENABLED 0
+#endif
+// <o> NRF_BLOCK_DEV_RAM_CONFIG_LOG_LEVEL  - Default Severity level
+ 
+// <0=> Off 
+// <1=> Error 
+// <2=> Warning 
+// <3=> Info 
+// <4=> Debug 
+
+#ifndef NRF_BLOCK_DEV_RAM_CONFIG_LOG_LEVEL
+#define NRF_BLOCK_DEV_RAM_CONFIG_LOG_LEVEL 3
+#endif
+
+// <o> NRF_BLOCK_DEV_RAM_CONFIG_LOG_INIT_FILTER_LEVEL  - Initial severity level if dynamic filtering is enabled
+ 
+// <0=> Off 
+// <1=> Error 
+// <2=> Warning 
+// <3=> Info 
+// <4=> Debug 
+
+#ifndef NRF_BLOCK_DEV_RAM_CONFIG_LOG_INIT_FILTER_LEVEL
+#define NRF_BLOCK_DEV_RAM_CONFIG_LOG_INIT_FILTER_LEVEL 3
+#endif
+
+// <o> NRF_BLOCK_DEV_RAM_CONFIG_INFO_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef NRF_BLOCK_DEV_RAM_CONFIG_INFO_COLOR
+#define NRF_BLOCK_DEV_RAM_CONFIG_INFO_COLOR 0
+#endif
+
+// <o> NRF_BLOCK_DEV_RAM_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef NRF_BLOCK_DEV_RAM_CONFIG_DEBUG_COLOR
+#define NRF_BLOCK_DEV_RAM_CONFIG_DEBUG_COLOR 0
 #endif
 
 // </e>
@@ -3203,6 +3788,57 @@
 
 // </e>
 
+// <e> PM_LOG_ENABLED - Enable logging in Peer Manager and its submodules.
+//==========================================================
+#ifndef PM_LOG_ENABLED
+#define PM_LOG_ENABLED 1
+#endif
+// <o> PM_LOG_LEVEL  - Default Severity level
+ 
+// <0=> Off 
+// <1=> Error 
+// <2=> Warning 
+// <3=> Info 
+// <4=> Debug 
+
+#ifndef PM_LOG_LEVEL
+#define PM_LOG_LEVEL 3
+#endif
+
+// <o> PM_LOG_INFO_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef PM_LOG_INFO_COLOR
+#define PM_LOG_INFO_COLOR 0
+#endif
+
+// <o> PM_LOG_DEBUG_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef PM_LOG_DEBUG_COLOR
+#define PM_LOG_DEBUG_COLOR 0
+#endif
+
+// </e>
+
 // </h> 
 //==========================================================
 
@@ -3266,8 +3902,14 @@
 // </h> 
 //==========================================================
 
-// </h> 
-//==========================================================
+// </e>
+
+// <q> NRF_LOG_STR_FORMATTER_TIMESTAMP_FORMAT_ENABLED  - nrf_log_str_formatter - Log string formatter
+ 
+
+#ifndef NRF_LOG_STR_FORMATTER_TIMESTAMP_FORMAT_ENABLED
+#define NRF_LOG_STR_FORMATTER_TIMESTAMP_FORMAT_ENABLED 1
+#endif
 
 // </h> 
 //==========================================================
@@ -3305,34 +3947,17 @@
 #define NFC_NDEF_TEXT_RECORD_ENABLED 1
 #endif
 
-// <e> NFC_T2T_HAL_ENABLED - nfc_t2t_hal - Hardware Abstraction Layer for NFC library.
+// <e> NFC_PLATFORM_ENABLED - nfc_platform - NFC platform module for Clock control.
 //==========================================================
-#ifndef NFC_T2T_HAL_ENABLED
-#define NFC_T2T_HAL_ENABLED 1
+#ifndef NFC_PLATFORM_ENABLED
+#define NFC_PLATFORM_ENABLED 1
 #endif
-// <o> NFCT_CONFIG_IRQ_PRIORITY  - Interrupt priority
- 
-
-// <i> Priorities 0,2 (nRF51) and 0,1,4,5 (nRF52) are reserved for SoftDevice
-// <0=> 0 (highest) 
-// <1=> 1 
-// <2=> 2 
-// <3=> 3 
-// <4=> 4 
-// <5=> 5 
-// <6=> 6 
-// <7=> 7 
-
-#ifndef NFCT_CONFIG_IRQ_PRIORITY
-#define NFCT_CONFIG_IRQ_PRIORITY 7
-#endif
-
-// <e> HAL_NFC_CONFIG_LOG_ENABLED - Enables logging in the module.
+// <e> NFC_PLATFORM_LOG_ENABLED - Enables logging in the module.
 //==========================================================
-#ifndef HAL_NFC_CONFIG_LOG_ENABLED
-#define HAL_NFC_CONFIG_LOG_ENABLED 0
+#ifndef NFC_PLATFORM_LOG_ENABLED
+#define NFC_PLATFORM_LOG_ENABLED 0
 #endif
-// <o> HAL_NFC_CONFIG_LOG_LEVEL  - Default Severity level
+// <o> NFC_PLATFORM_LOG_LEVEL  - Default Severity level
  
 // <0=> Off 
 // <1=> Error 
@@ -3340,11 +3965,11 @@
 // <3=> Info 
 // <4=> Debug 
 
-#ifndef HAL_NFC_CONFIG_LOG_LEVEL
-#define HAL_NFC_CONFIG_LOG_LEVEL 3
+#ifndef NFC_PLATFORM_LOG_LEVEL
+#define NFC_PLATFORM_LOG_LEVEL 3
 #endif
 
-// <o> HAL_NFC_CONFIG_INFO_COLOR  - ANSI escape code prefix.
+// <o> NFC_PLATFORM_INFO_COLOR  - ANSI escape code prefix.
  
 // <0=> Default 
 // <1=> Black 
@@ -3356,11 +3981,11 @@
 // <7=> Cyan 
 // <8=> White 
 
-#ifndef HAL_NFC_CONFIG_INFO_COLOR
-#define HAL_NFC_CONFIG_INFO_COLOR 0
+#ifndef NFC_PLATFORM_INFO_COLOR
+#define NFC_PLATFORM_INFO_COLOR 0
 #endif
 
-// <o> HAL_NFC_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
+// <o> NFC_PLATFORM_DEBUG_COLOR  - ANSI escape code prefix.
  
 // <0=> Default 
 // <1=> Black 
@@ -3372,472 +3997,11 @@
 // <7=> Cyan 
 // <8=> White 
 
-#ifndef HAL_NFC_CONFIG_DEBUG_COLOR
-#define HAL_NFC_CONFIG_DEBUG_COLOR 0
-#endif
-
-// <o> HAL_NFC_CONFIG_LOG_LEVEL  - Default Severity level
- 
-// <0=> Off 
-// <1=> Error 
-// <2=> Warning 
-// <3=> Info 
-// <4=> Debug 
-
-#ifndef HAL_NFC_CONFIG_LOG_LEVEL
-#define HAL_NFC_CONFIG_LOG_LEVEL 3
-#endif
-
-// <o> HAL_NFC_CONFIG_INFO_COLOR  - ANSI escape code prefix.
- 
-// <0=> Default 
-// <1=> Black 
-// <2=> Red 
-// <3=> Green 
-// <4=> Yellow 
-// <5=> Blue 
-// <6=> Magenta 
-// <7=> Cyan 
-// <8=> White 
-
-#ifndef HAL_NFC_CONFIG_INFO_COLOR
-#define HAL_NFC_CONFIG_INFO_COLOR 0
-#endif
-
-// <o> HAL_NFC_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
- 
-// <0=> Default 
-// <1=> Black 
-// <2=> Red 
-// <3=> Green 
-// <4=> Yellow 
-// <5=> Blue 
-// <6=> Magenta 
-// <7=> Cyan 
-// <8=> White 
-
-#ifndef HAL_NFC_CONFIG_DEBUG_COLOR
-#define HAL_NFC_CONFIG_DEBUG_COLOR 0
+#ifndef NFC_PLATFORM_DEBUG_COLOR
+#define NFC_PLATFORM_DEBUG_COLOR 0
 #endif
 
 // </e>
-
-// <e> HAL_NFC_CONFIG_DEBUG_PIN_ENABLED - Enables pin debug in the module.
-//==========================================================
-#ifndef HAL_NFC_CONFIG_DEBUG_PIN_ENABLED
-#define HAL_NFC_CONFIG_DEBUG_PIN_ENABLED 0
-#endif
-// <o> HAL_NFC_HCLOCK_ON_DEBUG_PIN  - Pin number
- 
-// <0=> 0 (P0.0) 
-// <1=> 1 (P0.1) 
-// <2=> 2 (P0.2) 
-// <3=> 3 (P0.3) 
-// <4=> 4 (P0.4) 
-// <5=> 5 (P0.5) 
-// <6=> 6 (P0.6) 
-// <7=> 7 (P0.7) 
-// <8=> 8 (P0.8) 
-// <9=> 9 (P0.9) 
-// <10=> 10 (P0.10) 
-// <11=> 11 (P0.11) 
-// <12=> 12 (P0.12) 
-// <13=> 13 (P0.13) 
-// <14=> 14 (P0.14) 
-// <15=> 15 (P0.15) 
-// <16=> 16 (P0.16) 
-// <17=> 17 (P0.17) 
-// <18=> 18 (P0.18) 
-// <19=> 19 (P0.19) 
-// <20=> 20 (P0.20) 
-// <21=> 21 (P0.21) 
-// <22=> 22 (P0.22) 
-// <23=> 23 (P0.23) 
-// <24=> 24 (P0.24) 
-// <25=> 25 (P0.25) 
-// <26=> 26 (P0.26) 
-// <27=> 27 (P0.27) 
-// <28=> 28 (P0.28) 
-// <29=> 29 (P0.29) 
-// <30=> 30 (P0.30) 
-// <31=> 31 (P0.31) 
-// <4294967295=> Not connected 
-
-#ifndef HAL_NFC_HCLOCK_ON_DEBUG_PIN
-#define HAL_NFC_HCLOCK_ON_DEBUG_PIN 11
-#endif
-
-// <o> HAL_NFC_HCLOCK_OFF_DEBUG_PIN  - Pin number
- 
-// <0=> 0 (P0.0) 
-// <1=> 1 (P0.1) 
-// <2=> 2 (P0.2) 
-// <3=> 3 (P0.3) 
-// <4=> 4 (P0.4) 
-// <5=> 5 (P0.5) 
-// <6=> 6 (P0.6) 
-// <7=> 7 (P0.7) 
-// <8=> 8 (P0.8) 
-// <9=> 9 (P0.9) 
-// <10=> 10 (P0.10) 
-// <11=> 11 (P0.11) 
-// <12=> 12 (P0.12) 
-// <13=> 13 (P0.13) 
-// <14=> 14 (P0.14) 
-// <15=> 15 (P0.15) 
-// <16=> 16 (P0.16) 
-// <17=> 17 (P0.17) 
-// <18=> 18 (P0.18) 
-// <19=> 19 (P0.19) 
-// <20=> 20 (P0.20) 
-// <21=> 21 (P0.21) 
-// <22=> 22 (P0.22) 
-// <23=> 23 (P0.23) 
-// <24=> 24 (P0.24) 
-// <25=> 25 (P0.25) 
-// <26=> 26 (P0.26) 
-// <27=> 27 (P0.27) 
-// <28=> 28 (P0.28) 
-// <29=> 29 (P0.29) 
-// <30=> 30 (P0.30) 
-// <31=> 31 (P0.31) 
-// <4294967295=> Not connected 
-
-#ifndef HAL_NFC_HCLOCK_OFF_DEBUG_PIN
-#define HAL_NFC_HCLOCK_OFF_DEBUG_PIN 12
-#endif
-
-// <o> HAL_NFC_NFC_EVENT_DEBUG_PIN  - Pin number
- 
-// <0=> 0 (P0.0) 
-// <1=> 1 (P0.1) 
-// <2=> 2 (P0.2) 
-// <3=> 3 (P0.3) 
-// <4=> 4 (P0.4) 
-// <5=> 5 (P0.5) 
-// <6=> 6 (P0.6) 
-// <7=> 7 (P0.7) 
-// <8=> 8 (P0.8) 
-// <9=> 9 (P0.9) 
-// <10=> 10 (P0.10) 
-// <11=> 11 (P0.11) 
-// <12=> 12 (P0.12) 
-// <13=> 13 (P0.13) 
-// <14=> 14 (P0.14) 
-// <15=> 15 (P0.15) 
-// <16=> 16 (P0.16) 
-// <17=> 17 (P0.17) 
-// <18=> 18 (P0.18) 
-// <19=> 19 (P0.19) 
-// <20=> 20 (P0.20) 
-// <21=> 21 (P0.21) 
-// <22=> 22 (P0.22) 
-// <23=> 23 (P0.23) 
-// <24=> 24 (P0.24) 
-// <25=> 25 (P0.25) 
-// <26=> 26 (P0.26) 
-// <27=> 27 (P0.27) 
-// <28=> 28 (P0.28) 
-// <29=> 29 (P0.29) 
-// <30=> 30 (P0.30) 
-// <31=> 31 (P0.31) 
-// <4294967295=> Not connected 
-
-#ifndef HAL_NFC_NFC_EVENT_DEBUG_PIN
-#define HAL_NFC_NFC_EVENT_DEBUG_PIN 24
-#endif
-
-// <o> HAL_NFC_DETECT_EVENT_DEBUG_PIN  - Pin number
- 
-// <0=> 0 (P0.0) 
-// <1=> 1 (P0.1) 
-// <2=> 2 (P0.2) 
-// <3=> 3 (P0.3) 
-// <4=> 4 (P0.4) 
-// <5=> 5 (P0.5) 
-// <6=> 6 (P0.6) 
-// <7=> 7 (P0.7) 
-// <8=> 8 (P0.8) 
-// <9=> 9 (P0.9) 
-// <10=> 10 (P0.10) 
-// <11=> 11 (P0.11) 
-// <12=> 12 (P0.12) 
-// <13=> 13 (P0.13) 
-// <14=> 14 (P0.14) 
-// <15=> 15 (P0.15) 
-// <16=> 16 (P0.16) 
-// <17=> 17 (P0.17) 
-// <18=> 18 (P0.18) 
-// <19=> 19 (P0.19) 
-// <20=> 20 (P0.20) 
-// <21=> 21 (P0.21) 
-// <22=> 22 (P0.22) 
-// <23=> 23 (P0.23) 
-// <24=> 24 (P0.24) 
-// <25=> 25 (P0.25) 
-// <26=> 26 (P0.26) 
-// <27=> 27 (P0.27) 
-// <28=> 28 (P0.28) 
-// <29=> 29 (P0.29) 
-// <30=> 30 (P0.30) 
-// <31=> 31 (P0.31) 
-// <4294967295=> Not connected 
-
-#ifndef HAL_NFC_DETECT_EVENT_DEBUG_PIN
-#define HAL_NFC_DETECT_EVENT_DEBUG_PIN 25
-#endif
-
-// <o> HAL_NFC_TIMER4_EVENT_DEBUG_PIN  - Pin number
- 
-// <0=> 0 (P0.0) 
-// <1=> 1 (P0.1) 
-// <2=> 2 (P0.2) 
-// <3=> 3 (P0.3) 
-// <4=> 4 (P0.4) 
-// <5=> 5 (P0.5) 
-// <6=> 6 (P0.6) 
-// <7=> 7 (P0.7) 
-// <8=> 8 (P0.8) 
-// <9=> 9 (P0.9) 
-// <10=> 10 (P0.10) 
-// <11=> 11 (P0.11) 
-// <12=> 12 (P0.12) 
-// <13=> 13 (P0.13) 
-// <14=> 14 (P0.14) 
-// <15=> 15 (P0.15) 
-// <16=> 16 (P0.16) 
-// <17=> 17 (P0.17) 
-// <18=> 18 (P0.18) 
-// <19=> 19 (P0.19) 
-// <20=> 20 (P0.20) 
-// <21=> 21 (P0.21) 
-// <22=> 22 (P0.22) 
-// <23=> 23 (P0.23) 
-// <24=> 24 (P0.24) 
-// <25=> 25 (P0.25) 
-// <26=> 26 (P0.26) 
-// <27=> 27 (P0.27) 
-// <28=> 28 (P0.28) 
-// <29=> 29 (P0.29) 
-// <30=> 30 (P0.30) 
-// <31=> 31 (P0.31) 
-// <4294967295=> Not connected 
-
-#ifndef HAL_NFC_TIMER4_EVENT_DEBUG_PIN
-#define HAL_NFC_TIMER4_EVENT_DEBUG_PIN 28
-#endif
-
-// <o> HAL_NFC_HCLOCK_ON_DEBUG_PIN  - Pin number
- 
-// <0=> 0 (P0.0) 
-// <1=> 1 (P0.1) 
-// <2=> 2 (P0.2) 
-// <3=> 3 (P0.3) 
-// <4=> 4 (P0.4) 
-// <5=> 5 (P0.5) 
-// <6=> 6 (P0.6) 
-// <7=> 7 (P0.7) 
-// <8=> 8 (P0.8) 
-// <9=> 9 (P0.9) 
-// <10=> 10 (P0.10) 
-// <11=> 11 (P0.11) 
-// <12=> 12 (P0.12) 
-// <13=> 13 (P0.13) 
-// <14=> 14 (P0.14) 
-// <15=> 15 (P0.15) 
-// <16=> 16 (P0.16) 
-// <17=> 17 (P0.17) 
-// <18=> 18 (P0.18) 
-// <19=> 19 (P0.19) 
-// <20=> 20 (P0.20) 
-// <21=> 21 (P0.21) 
-// <22=> 22 (P0.22) 
-// <23=> 23 (P0.23) 
-// <24=> 24 (P0.24) 
-// <25=> 25 (P0.25) 
-// <26=> 26 (P0.26) 
-// <27=> 27 (P0.27) 
-// <28=> 28 (P0.28) 
-// <29=> 29 (P0.29) 
-// <30=> 30 (P0.30) 
-// <31=> 31 (P0.31) 
-// <4294967295=> Not connected 
-
-#ifndef HAL_NFC_HCLOCK_ON_DEBUG_PIN
-#define HAL_NFC_HCLOCK_ON_DEBUG_PIN 31
-#endif
-
-// <o> HAL_NFC_HCLOCK_OFF_DEBUG_PIN  - Pin number
- 
-// <0=> 0 (P0.0) 
-// <1=> 1 (P0.1) 
-// <2=> 2 (P0.2) 
-// <3=> 3 (P0.3) 
-// <4=> 4 (P0.4) 
-// <5=> 5 (P0.5) 
-// <6=> 6 (P0.6) 
-// <7=> 7 (P0.7) 
-// <8=> 8 (P0.8) 
-// <9=> 9 (P0.9) 
-// <10=> 10 (P0.10) 
-// <11=> 11 (P0.11) 
-// <12=> 12 (P0.12) 
-// <13=> 13 (P0.13) 
-// <14=> 14 (P0.14) 
-// <15=> 15 (P0.15) 
-// <16=> 16 (P0.16) 
-// <17=> 17 (P0.17) 
-// <18=> 18 (P0.18) 
-// <19=> 19 (P0.19) 
-// <20=> 20 (P0.20) 
-// <21=> 21 (P0.21) 
-// <22=> 22 (P0.22) 
-// <23=> 23 (P0.23) 
-// <24=> 24 (P0.24) 
-// <25=> 25 (P0.25) 
-// <26=> 26 (P0.26) 
-// <27=> 27 (P0.27) 
-// <28=> 28 (P0.28) 
-// <29=> 29 (P0.29) 
-// <30=> 30 (P0.30) 
-// <31=> 31 (P0.31) 
-// <4294967295=> Not connected 
-
-#ifndef HAL_NFC_HCLOCK_OFF_DEBUG_PIN
-#define HAL_NFC_HCLOCK_OFF_DEBUG_PIN 31
-#endif
-
-// <o> HAL_NFC_NFC_EVENT_DEBUG_PIN  - Pin number
- 
-// <0=> 0 (P0.0) 
-// <1=> 1 (P0.1) 
-// <2=> 2 (P0.2) 
-// <3=> 3 (P0.3) 
-// <4=> 4 (P0.4) 
-// <5=> 5 (P0.5) 
-// <6=> 6 (P0.6) 
-// <7=> 7 (P0.7) 
-// <8=> 8 (P0.8) 
-// <9=> 9 (P0.9) 
-// <10=> 10 (P0.10) 
-// <11=> 11 (P0.11) 
-// <12=> 12 (P0.12) 
-// <13=> 13 (P0.13) 
-// <14=> 14 (P0.14) 
-// <15=> 15 (P0.15) 
-// <16=> 16 (P0.16) 
-// <17=> 17 (P0.17) 
-// <18=> 18 (P0.18) 
-// <19=> 19 (P0.19) 
-// <20=> 20 (P0.20) 
-// <21=> 21 (P0.21) 
-// <22=> 22 (P0.22) 
-// <23=> 23 (P0.23) 
-// <24=> 24 (P0.24) 
-// <25=> 25 (P0.25) 
-// <26=> 26 (P0.26) 
-// <27=> 27 (P0.27) 
-// <28=> 28 (P0.28) 
-// <29=> 29 (P0.29) 
-// <30=> 30 (P0.30) 
-// <31=> 31 (P0.31) 
-// <4294967295=> Not connected 
-
-#ifndef HAL_NFC_NFC_EVENT_DEBUG_PIN
-#define HAL_NFC_NFC_EVENT_DEBUG_PIN 31
-#endif
-
-// <o> HAL_NFC_DETECT_EVENT_DEBUG_PIN  - Pin number
- 
-// <0=> 0 (P0.0) 
-// <1=> 1 (P0.1) 
-// <2=> 2 (P0.2) 
-// <3=> 3 (P0.3) 
-// <4=> 4 (P0.4) 
-// <5=> 5 (P0.5) 
-// <6=> 6 (P0.6) 
-// <7=> 7 (P0.7) 
-// <8=> 8 (P0.8) 
-// <9=> 9 (P0.9) 
-// <10=> 10 (P0.10) 
-// <11=> 11 (P0.11) 
-// <12=> 12 (P0.12) 
-// <13=> 13 (P0.13) 
-// <14=> 14 (P0.14) 
-// <15=> 15 (P0.15) 
-// <16=> 16 (P0.16) 
-// <17=> 17 (P0.17) 
-// <18=> 18 (P0.18) 
-// <19=> 19 (P0.19) 
-// <20=> 20 (P0.20) 
-// <21=> 21 (P0.21) 
-// <22=> 22 (P0.22) 
-// <23=> 23 (P0.23) 
-// <24=> 24 (P0.24) 
-// <25=> 25 (P0.25) 
-// <26=> 26 (P0.26) 
-// <27=> 27 (P0.27) 
-// <28=> 28 (P0.28) 
-// <29=> 29 (P0.29) 
-// <30=> 30 (P0.30) 
-// <31=> 31 (P0.31) 
-// <4294967295=> Not connected 
-
-#ifndef HAL_NFC_DETECT_EVENT_DEBUG_PIN
-#define HAL_NFC_DETECT_EVENT_DEBUG_PIN 31
-#endif
-
-// <o> HAL_NFC_TIMER4_EVENT_DEBUG_PIN  - Pin number
- 
-// <0=> 0 (P0.0) 
-// <1=> 1 (P0.1) 
-// <2=> 2 (P0.2) 
-// <3=> 3 (P0.3) 
-// <4=> 4 (P0.4) 
-// <5=> 5 (P0.5) 
-// <6=> 6 (P0.6) 
-// <7=> 7 (P0.7) 
-// <8=> 8 (P0.8) 
-// <9=> 9 (P0.9) 
-// <10=> 10 (P0.10) 
-// <11=> 11 (P0.11) 
-// <12=> 12 (P0.12) 
-// <13=> 13 (P0.13) 
-// <14=> 14 (P0.14) 
-// <15=> 15 (P0.15) 
-// <16=> 16 (P0.16) 
-// <17=> 17 (P0.17) 
-// <18=> 18 (P0.18) 
-// <19=> 19 (P0.19) 
-// <20=> 20 (P0.20) 
-// <21=> 21 (P0.21) 
-// <22=> 22 (P0.22) 
-// <23=> 23 (P0.23) 
-// <24=> 24 (P0.24) 
-// <25=> 25 (P0.25) 
-// <26=> 26 (P0.26) 
-// <27=> 27 (P0.27) 
-// <28=> 28 (P0.28) 
-// <29=> 29 (P0.29) 
-// <30=> 30 (P0.30) 
-// <31=> 31 (P0.31) 
-// <4294967295=> Not connected 
-
-#ifndef HAL_NFC_TIMER4_EVENT_DEBUG_PIN
-#define HAL_NFC_TIMER4_EVENT_DEBUG_PIN 31
-#endif
-
-// </e>
-
-// <o> HAL_NFC_FIELD_TIMER_PERIOD - TIMER4 period in us (used for workaround).  <100-10000> 
-
-
-// <i> This value is used as a timeout for polling NFC field to detect FIELDLOST event.
-// <i> This value can affect Tag behavior.
-
-#ifndef HAL_NFC_FIELD_TIMER_PERIOD
-#define HAL_NFC_FIELD_TIMER_PERIOD 100
-#endif
 
 // </e>
 
@@ -3858,17 +4022,17 @@
 #define SEGGER_RTT_CONFIG_BUFFER_SIZE_UP 512
 #endif
 
-// <o> SEGGER_RTT_CONFIG_MAX_NUM_UP_BUFFERS - Size of upstream buffer. 
+// <o> SEGGER_RTT_CONFIG_MAX_NUM_UP_BUFFERS - Maximum number of upstream buffers. 
 #ifndef SEGGER_RTT_CONFIG_MAX_NUM_UP_BUFFERS
 #define SEGGER_RTT_CONFIG_MAX_NUM_UP_BUFFERS 2
 #endif
 
-// <o> SEGGER_RTT_CONFIG_BUFFER_SIZE_DOWN - Size of upstream buffer. 
+// <o> SEGGER_RTT_CONFIG_BUFFER_SIZE_DOWN - Size of downstream buffer. 
 #ifndef SEGGER_RTT_CONFIG_BUFFER_SIZE_DOWN
 #define SEGGER_RTT_CONFIG_BUFFER_SIZE_DOWN 16
 #endif
 
-// <o> SEGGER_RTT_CONFIG_MAX_NUM_DOWN_BUFFERS - Size of upstream buffer. 
+// <o> SEGGER_RTT_CONFIG_MAX_NUM_DOWN_BUFFERS - Maximum number of downstream buffers. 
 #ifndef SEGGER_RTT_CONFIG_MAX_NUM_DOWN_BUFFERS
 #define SEGGER_RTT_CONFIG_MAX_NUM_DOWN_BUFFERS 2
 #endif

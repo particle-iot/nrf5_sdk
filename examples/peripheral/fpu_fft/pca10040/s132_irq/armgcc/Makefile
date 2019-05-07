@@ -1,4 +1,4 @@
-PROJECT_NAME     := fpu_fft_example_s132_pca10040_irq
+PROJECT_NAME     := fpu_fft_s132_pca10040_irq
 TARGETS          := nrf52832_xxaa_s132
 OUTPUT_DIRECTORY := _build
 
@@ -6,17 +6,17 @@ SDK_ROOT := ../../../../../..
 PROJ_DIR := ../../..
 
 $(OUTPUT_DIRECTORY)/nrf52832_xxaa_s132.out: \
-  LINKER_SCRIPT  := fpu_fft_example_gcc_nrf52.ld
+  LINKER_SCRIPT  := fpu_fft_gcc_nrf52.ld
 
 # Source files common to all targets
 SRC_FILES += \
   $(SDK_ROOT)/modules/nrfx/mdk/gcc_startup_nrf52.S \
-  $(SDK_ROOT)/components/libraries/experimental_log/src/nrf_log_backend_rtt.c \
-  $(SDK_ROOT)/components/libraries/experimental_log/src/nrf_log_backend_serial.c \
-  $(SDK_ROOT)/components/libraries/experimental_log/src/nrf_log_backend_uart.c \
-  $(SDK_ROOT)/components/libraries/experimental_log/src/nrf_log_default_backends.c \
-  $(SDK_ROOT)/components/libraries/experimental_log/src/nrf_log_frontend.c \
-  $(SDK_ROOT)/components/libraries/experimental_log/src/nrf_log_str_formatter.c \
+  $(SDK_ROOT)/components/libraries/log/src/nrf_log_backend_rtt.c \
+  $(SDK_ROOT)/components/libraries/log/src/nrf_log_backend_serial.c \
+  $(SDK_ROOT)/components/libraries/log/src/nrf_log_backend_uart.c \
+  $(SDK_ROOT)/components/libraries/log/src/nrf_log_default_backends.c \
+  $(SDK_ROOT)/components/libraries/log/src/nrf_log_frontend.c \
+  $(SDK_ROOT)/components/libraries/log/src/nrf_log_str_formatter.c \
   $(SDK_ROOT)/components/boards/boards.c \
   $(SDK_ROOT)/components/libraries/util/app_error.c \
   $(SDK_ROOT)/components/libraries/util/app_error_handler_gcc.c \
@@ -27,10 +27,12 @@ SRC_FILES += \
   $(SDK_ROOT)/components/libraries/balloc/nrf_balloc.c \
   $(SDK_ROOT)/external/fprintf/nrf_fprintf.c \
   $(SDK_ROOT)/external/fprintf/nrf_fprintf_format.c \
-  $(SDK_ROOT)/components/libraries/experimental_memobj/nrf_memobj.c \
+  $(SDK_ROOT)/components/libraries/memobj/nrf_memobj.c \
+  $(SDK_ROOT)/components/libraries/ringbuf/nrf_ringbuf.c \
   $(SDK_ROOT)/components/libraries/experimental_section_vars/nrf_section_iter.c \
   $(SDK_ROOT)/components/libraries/strerror/nrf_strerror.c \
   $(SDK_ROOT)/integration/nrfx/legacy/nrf_drv_uart.c \
+  $(SDK_ROOT)/modules/nrfx/soc/nrfx_atomic.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/prs/nrfx_prs.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_uart.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_uarte.c \
@@ -46,27 +48,28 @@ SRC_FILES += \
 INC_FOLDERS += \
   $(SDK_ROOT)/components \
   $(SDK_ROOT)/modules/nrfx/mdk \
-  $(SDK_ROOT)/components/libraries/experimental_log \
   $(SDK_ROOT)/components/libraries/strerror \
   $(SDK_ROOT)/components/softdevice/s132/headers/nrf52 \
   $(SDK_ROOT)/components/toolchain/cmsis/include \
   $(SDK_ROOT)/components/libraries/util \
   ../config \
   $(SDK_ROOT)/components/libraries/balloc \
+  $(SDK_ROOT)/components/libraries/ringbuf \
   $(SDK_ROOT)/modules/nrfx/hal \
   $(SDK_ROOT)/components/libraries/bsp \
+  $(SDK_ROOT)/components/libraries/log \
   $(SDK_ROOT)/modules/nrfx \
   $(SDK_ROOT)/components/libraries/experimental_section_vars \
   $(SDK_ROOT)/components/softdevice/s132/headers \
   $(SDK_ROOT)/integration/nrfx/legacy \
-  $(SDK_ROOT)/components/libraries/experimental_log/src \
   $(SDK_ROOT)/components/libraries/delay \
   $(SDK_ROOT)/integration/nrfx \
   $(SDK_ROOT)/external/segger_rtt \
   $(SDK_ROOT)/components/boards \
-  $(SDK_ROOT)/components/libraries/experimental_memobj \
+  $(SDK_ROOT)/components/libraries/memobj \
   $(SDK_ROOT)/components/softdevice/common \
   $(SDK_ROOT)/modules/nrfx/drivers/include \
+  $(SDK_ROOT)/components/libraries/log/src \
   $(SDK_ROOT)/external/fprintf \
   $(SDK_ROOT)/components/libraries/atomic \
 
@@ -165,15 +168,15 @@ $(foreach target, $(TARGETS), $(call define_target, $(target)))
 .PHONY: flash flash_softdevice erase
 
 # Flash the program
-flash: $(OUTPUT_DIRECTORY)/nrf52832_xxaa_s132.hex
-	@echo Flashing: $<
-	nrfjprog -f nrf52 --program $< --sectorerase
+flash: default
+	@echo Flashing: $(OUTPUT_DIRECTORY)/nrf52832_xxaa_s132.hex
+	nrfjprog -f nrf52 --program $(OUTPUT_DIRECTORY)/nrf52832_xxaa_s132.hex --sectorerase
 	nrfjprog -f nrf52 --reset
 
 # Flash softdevice
 flash_softdevice:
-	@echo Flashing: s132_nrf52_6.0.0_softdevice.hex
-	nrfjprog -f nrf52 --program $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_6.0.0_softdevice.hex --sectorerase
+	@echo Flashing: s132_nrf52_6.1.1_softdevice.hex
+	nrfjprog -f nrf52 --program $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_6.1.1_softdevice.hex --sectorerase
 	nrfjprog -f nrf52 --reset
 
 erase:

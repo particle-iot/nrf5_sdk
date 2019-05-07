@@ -30,7 +30,6 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "app_util.h"
-#include "nrf_log.h"
 
 #ifdef SOFTDEVICE_PRESENT
 #include "nrf_soc.h"
@@ -236,7 +235,6 @@ void vPortSuppressTicksAndSleep( TickType_t xExpectedIdleTime )
         configPRE_SLEEP_PROCESSING( xModifiableIdleTime );
         if ( xModifiableIdleTime > 0 )
         {
-#if 0  // With FreeRTOS sd_app_evt_wait increases power consumption with FreeRTOS compared to _WFE (NRFFOSDK-11174)
 #ifdef SOFTDEVICE_PRESENT
             if (nrf_sdh_is_enabled())
             {
@@ -245,7 +243,6 @@ void vPortSuppressTicksAndSleep( TickType_t xExpectedIdleTime )
             }
             else
 #endif
-#endif // (NRFFOSDK-11174)
             {
                 /* No SD -  we would just block interrupts globally.
                 * BASEPRI cannot be used for that because it would prevent WFE from wake up.

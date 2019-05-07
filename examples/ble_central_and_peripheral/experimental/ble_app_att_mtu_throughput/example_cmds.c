@@ -1,30 +1,30 @@
 /**
- * Copyright (c) 2017 - 2018, Nordic Semiconductor ASA
- * 
+ * Copyright (c) 2017 - 2019, Nordic Semiconductor ASA
+ *
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form, except as embedded into a Nordic
  *    Semiconductor ASA integrated circuit in a product or a software update for
  *    such product, must reproduce the above copyright notice, this list of
  *    conditions and the following disclaimer in the documentation and/or other
  *    materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
- * 
+ *
  * 4. This software, with or without modification, must only be used with a
  *    Nordic Semiconductor ASA integrated circuit.
- * 
+ *
  * 5. Any software provided in binary form under this license must not be reverse
  *    engineered, decompiled, modified and/or disassembled.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
  * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -35,7 +35,7 @@
  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  */
 
 #include "ble_gap.h"
@@ -59,19 +59,19 @@ static void att_mtu_size_set(nrf_cli_t const * p_cli, uint16_t value)
 {
     if (value < BLE_GATT_ATT_MTU_DEFAULT || value > NRF_SDH_BLE_GATT_MAX_MTU_SIZE)
     {
-        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "Invalid setting: %d.\r\n", value);
+        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "Invalid setting: %d.\n", value);
         return;
     }
 
     gatt_mtu_set(value);
-    nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "ATT MTU size set to %d bytes.\r\n", value);
+    nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "ATT MTU size set to %d bytes.\n", value);
 }
 
 
 static void conn_interval_set(nrf_cli_t const * p_cli, uint16_t value)
 {
     connection_interval_set(value);
-    nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "Connection interval set to %d units.\r\n", value);
+    nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "Connection interval set to %d units.\n", value);
 }
 
 
@@ -80,19 +80,19 @@ static void dl_set(nrf_cli_t const * p_cli, uint32_t value)
     // These are the stack default values.
     if (value < 27 || value > 251)
     {
-        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "Invalid setting: %d.\r\n", value);
+        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "Invalid setting: %d.\n", value);
         return;
     }
 
     data_len_set(value);
-    nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "Data length set to %d.\r\n", value);
+    nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "Data length set to %d.\n", value);
 }
 
 
 static void cele_set(nrf_cli_t const * p_cli, bool enable)
 {
     nrf_cli_fprintf(
-        p_cli, NRF_CLI_NORMAL, "Connection event length extension %s.\r\n", enable ? "on" : "off");
+        p_cli, NRF_CLI_NORMAL, "Connection event length extension %s.\n", enable ? "on" : "off");
     conn_evt_len_ext_set(enable);
 }
 
@@ -106,7 +106,7 @@ static void phy_set(nrf_cli_t const * p_cli, uint8_t value)
     };
 
     preferred_phy_set(&phy);
-    nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "Preferred PHY set to %s.\r\n", phy_str(phy));
+    nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "Preferred PHY set to %s.\n", phy_str(phy));
 }
 
 
@@ -200,7 +200,7 @@ static void att_mtu_cmd(nrf_cli_t const * p_cli, size_t argc, char ** argv)
     }
     else
     {
-        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s:%s\r\n", argv[0], " wrong parameter list");
+        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s:%s\n", argv[0], " wrong parameter list");
     }
 }
 
@@ -217,7 +217,7 @@ static void data_len_cmd(nrf_cli_t const * p_cli, size_t argc, char ** argv)
     }
     else
     {
-        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s:%s\r\n", argv[0], " wrong parameter list");
+        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s:%s\n", argv[0], " wrong parameter list");
     }
 }
 
@@ -230,9 +230,9 @@ static void config_print_cmd(nrf_cli_t const * p_cli, size_t argc, char ** argv)
 
 static void gap_evt_len_cmd(nrf_cli_t const * p_cli, size_t argc, char ** argv)
 {
-    nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "This value cannot be set at runtime.\r\n"
+    nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "This value cannot be set at runtime.\n"
                                            "Modify NRF_SDH_BLE_GAP_EVENT_LENGTH in sdk_config.h "
-                                           "and recompile the application.\r\n");
+                                           "and recompile the application.\n");
 }
 
 
@@ -246,7 +246,7 @@ static void default_cmd(nrf_cli_t const * p_cli, size_t argc, char ** argv)
     {
         nrf_cli_fprintf(p_cli,
                         NRF_CLI_ERROR,
-                        "%s:%s%s\r\n",
+                        "%s:%s%s\n",
                         argv[0],
                         " unknown parameter: ",
                         argv[1]);
@@ -274,7 +274,7 @@ static void cmd_test_run(nrf_cli_t const * p_cli, size_t argc, char ** argv)
     }
     else
     {
-        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "Wrong board setup!\r\n");
+        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "Wrong board setup!\n");
     }
 }
 

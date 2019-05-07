@@ -11,14 +11,15 @@ $(OUTPUT_DIRECTORY)/nrf52840_xxaa.out: \
 # Source files common to all targets
 SRC_FILES += \
   $(SDK_ROOT)/modules/nrfx/mdk/gcc_startup_nrf52840.S \
-  $(SDK_ROOT)/components/libraries/experimental_log/src/nrf_log_backend_rtt.c \
-  $(SDK_ROOT)/components/libraries/experimental_log/src/nrf_log_backend_serial.c \
-  $(SDK_ROOT)/components/libraries/experimental_log/src/nrf_log_default_backends.c \
-  $(SDK_ROOT)/components/libraries/experimental_log/src/nrf_log_frontend.c \
-  $(SDK_ROOT)/components/libraries/experimental_log/src/nrf_log_str_formatter.c \
+  $(SDK_ROOT)/components/libraries/log/src/nrf_log_backend_rtt.c \
+  $(SDK_ROOT)/components/libraries/log/src/nrf_log_backend_serial.c \
+  $(SDK_ROOT)/components/libraries/log/src/nrf_log_default_backends.c \
+  $(SDK_ROOT)/components/libraries/log/src/nrf_log_frontend.c \
+  $(SDK_ROOT)/components/libraries/log/src/nrf_log_str_formatter.c \
   $(SDK_ROOT)/components/boards/boards.c \
   $(PROJ_DIR)/test_cases/test_ecdsa.c \
   $(PROJ_DIR)/test_cases/test_sha.c \
+  $(PROJ_DIR)/test_cases/test_vectors_ecdsa_random.c \
   $(PROJ_DIR)/test_cases/test_vectors_ecdsa_sign.c \
   $(PROJ_DIR)/test_cases/test_vectors_ecdsa_verify.c \
   $(PROJ_DIR)/test_cases/test_vectors_sha.c \
@@ -39,10 +40,12 @@ SRC_FILES += \
   $(SDK_ROOT)/components/libraries/balloc/nrf_balloc.c \
   $(SDK_ROOT)/external/fprintf/nrf_fprintf.c \
   $(SDK_ROOT)/external/fprintf/nrf_fprintf_format.c \
-  $(SDK_ROOT)/components/libraries/experimental_memobj/nrf_memobj.c \
+  $(SDK_ROOT)/components/libraries/memobj/nrf_memobj.c \
   $(SDK_ROOT)/components/libraries/queue/nrf_queue.c \
+  $(SDK_ROOT)/components/libraries/ringbuf/nrf_ringbuf.c \
   $(SDK_ROOT)/components/libraries/strerror/nrf_strerror.c \
   $(SDK_ROOT)/integration/nrfx/legacy/nrf_drv_rng.c \
+  $(SDK_ROOT)/modules/nrfx/soc/nrfx_atomic.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_rng.c \
   $(SDK_ROOT)/components/libraries/crypto/nrf_crypto_ecc.c \
   $(SDK_ROOT)/components/libraries/crypto/nrf_crypto_ecdsa.c \
@@ -62,6 +65,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/modules/nrfx/mdk \
   $(SDK_ROOT)/external/nrf_cc310/include \
   $(SDK_ROOT)/components/libraries/scheduler \
+  $(SDK_ROOT)/modules/nrfx \
   $(SDK_ROOT)/components/libraries/crypto/backend/oberon \
   $(SDK_ROOT)/external/nrf_cc310_bl/include \
   $(SDK_ROOT)/components/libraries/queue \
@@ -71,40 +75,41 @@ INC_FOLDERS += \
   $(PROJ_DIR)/common_test \
   $(SDK_ROOT)/components/toolchain/cmsis/include \
   $(SDK_ROOT)/components/libraries/mem_manager \
-  $(SDK_ROOT)/components/libraries/util \
+  $(SDK_ROOT)/components/libraries/crypto/backend/optiga \
   $(SDK_ROOT)/components/libraries/bsp \
   ../config \
   $(SDK_ROOT)/components/libraries/crypto \
   $(SDK_ROOT)/components/libraries/crypto/backend/nrf_sw \
+  $(SDK_ROOT)/components/libraries/ringbuf \
   $(SDK_ROOT)/modules/nrfx/hal \
   $(SDK_ROOT)/components/libraries/crypto/backend/mbedtls \
   $(SDK_ROOT)/components/libraries/crypto/backend/cc310 \
   $(SDK_ROOT)/components/libraries/crypto/backend/nrf_hw \
-  $(SDK_ROOT)/components/libraries/experimental_log \
-  $(SDK_ROOT)/modules/nrfx \
+  $(SDK_ROOT)/components/libraries/timer \
+  $(SDK_ROOT)/components/libraries/log \
+  $(SDK_ROOT)/components/libraries/util \
   $(SDK_ROOT)/components/libraries/experimental_section_vars \
   $(SDK_ROOT)/integration/nrfx/legacy \
   $(PROJ_DIR)/test_cases \
   $(SDK_ROOT)/components/libraries/mutex \
-  $(SDK_ROOT)/components/libraries/experimental_log/src \
   $(SDK_ROOT)/components/libraries/delay \
   $(SDK_ROOT)/external/segger_rtt \
   $(SDK_ROOT)/components/drivers_nrf/nrf_soc_nosd \
   $(SDK_ROOT)/components/libraries/atomic \
   $(SDK_ROOT)/components/boards \
+  $(SDK_ROOT)/components/libraries/memobj \
   $(SDK_ROOT)/components/libraries/crypto/backend/cc310_bl \
-  $(SDK_ROOT)/components/libraries/experimental_memobj \
   $(SDK_ROOT)/integration/nrfx \
   $(SDK_ROOT)/components/libraries/balloc \
   $(SDK_ROOT)/components/libraries/crypto/backend/micro_ecc \
   $(SDK_ROOT)/components/libraries/crypto/backend/cifra \
   $(SDK_ROOT)/modules/nrfx/drivers/include \
-  $(SDK_ROOT)/components/libraries/timer \
   $(SDK_ROOT)/external/fprintf \
+  $(SDK_ROOT)/components/libraries/log/src \
 
 # Libraries common to all targets
 LIB_FILES += \
-  $(SDK_ROOT)/external/nrf_cc310_bl/lib/libnrf_cc310_bl_0.9.9.a \
+  $(SDK_ROOT)/external/nrf_cc310_bl/lib/cortex-m4/hard-float/libnrf_cc310_bl_0.9.12.a \
 
 # Optimization flags
 OPT = -O3 -g3
@@ -184,9 +189,9 @@ $(foreach target, $(TARGETS), $(call define_target, $(target)))
 .PHONY: flash erase
 
 # Flash the program
-flash: $(OUTPUT_DIRECTORY)/nrf52840_xxaa.hex
-	@echo Flashing: $<
-	nrfjprog -f nrf52 --program $< --sectorerase
+flash: default
+	@echo Flashing: $(OUTPUT_DIRECTORY)/nrf52840_xxaa.hex
+	nrfjprog -f nrf52 --program $(OUTPUT_DIRECTORY)/nrf52840_xxaa.hex --sectorerase
 	nrfjprog -f nrf52 --reset
 
 erase:

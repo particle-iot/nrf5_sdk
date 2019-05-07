@@ -1,30 +1,30 @@
 /**
- * Copyright (c) 2014 - 2018, Nordic Semiconductor ASA
- * 
+ * Copyright (c) 2014 - 2019, Nordic Semiconductor ASA
+ *
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form, except as embedded into a Nordic
  *    Semiconductor ASA integrated circuit in a product or a software update for
  *    such product, must reproduce the above copyright notice, this list of
  *    conditions and the following disclaimer in the documentation and/or other
  *    materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
- * 
+ *
  * 4. This software, with or without modification, must only be used with a
  *    Nordic Semiconductor ASA integrated circuit.
- * 
+ *
  * 5. Any software provided in binary form under this license must not be reverse
  *    engineered, decompiled, modified and/or disassembled.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
  * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -35,7 +35,7 @@
  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  */
 #include <stdbool.h>
 #include <string.h>
@@ -44,7 +44,9 @@
 #include "ser_config.h"
 #include "ser_phy.h"
 #include "ser_hal_transport.h"
-
+#if defined(APP_SCHEDULER_WITH_PAUSE) && APP_SCHEDULER_WITH_PAUSE
+#include "app_scheduler.h"
+#endif
 #define NRF_LOG_MODULE_NAME ser_hal_transport
 #if SER_HAL_TRANSPORT_CONFIG_LOG_ENABLED
     #define NRF_LOG_LEVEL       SER_HAL_TRANSPORT_CONFIG_LOG_LEVEL
@@ -276,6 +278,9 @@ static void phy_events_handler(ser_phy_evt_t phy_event)
                 m_tx_state = HAL_TRANSP_TX_STATE_TRANSMITTED;
                 err_code   = ser_hal_transport_tx_pkt_free(phy_event.evt_params.hw_error.p_buffer);
                 APP_ERROR_CHECK(err_code);
+#if defined(APP_SCHEDULER_WITH_PAUSE) && APP_SCHEDULER_WITH_PAUSE
+                app_sched_resume();
+#endif
                 /* An event to an upper layer that a packet has been transmitted. */
             }
             else if (HAL_TRANSP_RX_STATE_RECEIVING == m_rx_state)
@@ -295,6 +300,12 @@ static void phy_events_handler(ser_phy_evt_t phy_event)
             break;
         }
     }
+}
+
+void ser_hal_transport_reset(void)
+{
+    m_rx_state = HAL_TRANSP_RX_STATE_IDLE;
+    m_tx_state = HAL_TRANSP_TX_STATE_IDLE;
 }
 
 uint32_t ser_hal_transport_open(ser_hal_transport_events_handler_t events_handler)

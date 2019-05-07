@@ -1,30 +1,30 @@
 /**
- * Copyright (c) 2015 - 2018, Nordic Semiconductor ASA
- * 
+ * Copyright (c) 2015 - 2019, Nordic Semiconductor ASA
+ *
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form, except as embedded into a Nordic
  *    Semiconductor ASA integrated circuit in a product or a software update for
  *    such product, must reproduce the above copyright notice, this list of
  *    conditions and the following disclaimer in the documentation and/or other
  *    materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
- * 
+ *
  * 4. This software, with or without modification, must only be used with a
  *    Nordic Semiconductor ASA integrated circuit.
- * 
+ *
  * 5. Any software provided in binary form under this license must not be reverse
  *    engineered, decompiled, modified and/or disassembled.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
  * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -35,7 +35,7 @@
  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  */
 #ifndef FDS_H__
 #define FDS_H__
@@ -318,7 +318,8 @@ ret_code_t fds_init(void);
  *
  * @param[out]  p_desc      The descriptor of the record that was written. Pass NULL if you do not
  *                          need the descriptor.
- * @param[in]   p_record    The record to be written to flash.
+ * @param[in]   p_record    The record to be written to flash. The record is required to be word
+ *                          aligned.
  *
  * @retval  FDS_SUCCESS                 If the operation was queued successfully.
  * @retval  FDS_ERR_NOT_INITIALIZED     If the module is not initialized.
@@ -393,7 +394,8 @@ ret_code_t fds_reserve_cancel(fds_reserve_token_t * p_token);
  *
  * @param[out]  p_desc      The descriptor of the record that was written. Pass NULL if you do not
  *                          need the descriptor.
- * @param[in]   p_record    The record to be written to flash.
+ * @param[in]   p_record    The record to be written to flash. The record is required
+ *                          to be word aligned.
  * @param[in]   p_token     The token that identifies the space reserved in flash.
  *
  * @retval  FDS_SUCCESS                 If the operation was queued successfully.
@@ -477,7 +479,8 @@ ret_code_t fds_file_delete(uint16_t file_id);
  * @param[in, out]  p_desc      The descriptor of the record to update. When the function
  *                              returns with FDS_SUCCESS, this parameter contains the
  *                              descriptor of the newly written record.
- * @param[in]       p_record    The updated record to be written to flash.
+ * @param[in]       p_record    The updated record to be written to flash. The record is required
+ *                              to be word aligned.
  *
  * @retval  FDS_SUCCESS                 If the operation was queued successfully.
  * @retval  FDS_ERR_NOT_INITIALIZED     If the module is not initialized.

@@ -1,30 +1,30 @@
 /**
- * Copyright (c) 2015 - 2018, Nordic Semiconductor ASA
- * 
+ * Copyright (c) 2015 - 2019, Nordic Semiconductor ASA
+ *
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form, except as embedded into a Nordic
  *    Semiconductor ASA integrated circuit in a product or a software update for
  *    such product, must reproduce the above copyright notice, this list of
  *    conditions and the following disclaimer in the documentation and/or other
  *    materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
- * 
+ *
  * 4. This software, with or without modification, must only be used with a
  *    Nordic Semiconductor ASA integrated circuit.
- * 
+ *
  * 5. Any software provided in binary form under this license must not be reverse
  *    engineered, decompiled, modified and/or disassembled.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
  * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -35,7 +35,7 @@
  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  */
 
 #ifndef NRFX_UARTE_H__
@@ -70,6 +70,12 @@ enum {
 #endif
 #if NRFX_CHECK(NRFX_UARTE1_ENABLED)
     NRFX_UARTE1_INST_IDX,
+#endif
+#if NRFX_CHECK(NRFX_UARTE2_ENABLED)
+    NRFX_UARTE2_INST_IDX,
+#endif
+#if NRFX_CHECK(NRFX_UARTE3_ENABLED)
+    NRFX_UARTE3_INST_IDX,
 #endif
     NRFX_UARTE_ENABLED_COUNT
 };
@@ -131,7 +137,7 @@ typedef struct
 typedef struct
 {
     uint8_t * p_data; ///< Pointer to memory used for transfer.
-    uint8_t   bytes;  ///< Number of bytes transfered.
+    size_t    bytes;  ///< Number of bytes transfered.
 } nrfx_uarte_xfer_evt_t;
 
 /**
@@ -353,6 +359,8 @@ __STATIC_INLINE uint32_t nrfx_uarte_event_address_get(nrfx_uarte_t const * p_ins
 
 void nrfx_uarte_0_irq_handler(void);
 void nrfx_uarte_1_irq_handler(void);
+void nrfx_uarte_2_irq_handler(void);
+void nrfx_uarte_3_irq_handler(void);
 
 /** @} */
 

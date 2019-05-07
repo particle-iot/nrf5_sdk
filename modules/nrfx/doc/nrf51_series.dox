@@ -4,6 +4,8 @@
 
 @ref nrf_adc
 
+@ref nrf_ccm
+
 @ref nrf_clock
 
 @ref nrf_ecb
@@ -14,6 +16,8 @@
 
 @ref nrf_lpcomp
 
+@ref nrf_mpu
+
 @ref nrf_nvmc
 
 @ref nrf_power
@@ -21,6 +25,8 @@
 @ref nrf_ppi
 
 @ref nrf_qdec
+
+@ref nrf_radio
 
 @ref nrf_rng
 

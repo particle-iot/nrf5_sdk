@@ -1,30 +1,30 @@
 /**
- * Copyright (c) 2014 - 2018, Nordic Semiconductor ASA
- * 
+ * Copyright (c) 2014 - 2019, Nordic Semiconductor ASA
+ *
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form, except as embedded into a Nordic
  *    Semiconductor ASA integrated circuit in a product or a software update for
  *    such product, must reproduce the above copyright notice, this list of
  *    conditions and the following disclaimer in the documentation and/or other
  *    materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
- * 
+ *
  * 4. This software, with or without modification, must only be used with a
  *    Nordic Semiconductor ASA integrated circuit.
- * 
+ *
  * 5. Any software provided in binary form under this license must not be reverse
  *    engineered, decompiled, modified and/or disassembled.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
  * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -35,7 +35,7 @@
  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  */
 #include "ble_gap.h"
 #include <stdint.h>
@@ -1069,7 +1069,9 @@ uint32_t _sd_ble_gap_scan_stop(void)
                                                        &buffer_length);
     //@note: Should never fail.
     APP_ERROR_CHECK(err_code);
-
+#if defined(NRF_SD_BLE_API_VERSION) && NRF_SD_BLE_API_VERSION > 5
+    app_ble_gap_scan_data_unset(true);
+#endif
     //@note: Increment buffer length as internally managed packet type field must be included.
     return ser_sd_transport_cmd_write(p_buffer,
                                       (++buffer_length),
@@ -1195,6 +1197,13 @@ static uint32_t gap_scan_start_rsp_dec(const uint8_t * p_buffer, uint16_t length
                                                          length,
                                                          &result_code);
 
+    if (result_code != NRF_SUCCESS)
+    {
+#if NRF_SD_BLE_API_VERSION > 5
+    	app_ble_gap_scan_data_unset(true);
+#endif
+    }
+
     //@note: Should never fail.
     APP_ERROR_CHECK(err_code);
 
@@ -1215,13 +1224,7 @@ uint32_t _sd_ble_gap_scan_start(ble_gap_scan_params_t const * const p_scan_param
     uint32_t  err_code;
 
     tx_buf_alloc(&p_buffer, (uint16_t *)&buffer_length);
-#if defined(NRF_SD_BLE_API_VERSION) && NRF_SD_BLE_API_VERSION > 5
-    if (p_adv_report_buffer)
-    {
-        err_code = app_ble_gap_scan_data_set(p_adv_report_buffer);
-        APP_ERROR_CHECK(err_code);
-    }
-#endif
+
     err_code = ble_gap_scan_start_req_enc(p_scan_params,
 #if defined(NRF_SD_BLE_API_VERSION) && NRF_SD_BLE_API_VERSION > 5
                                                          p_adv_report_buffer,
@@ -1231,6 +1234,11 @@ uint32_t _sd_ble_gap_scan_start(ble_gap_scan_params_t const * const p_scan_param
     //@note: Should never fail.
     APP_ERROR_CHECK(err_code);
 
+#if defined(NRF_SD_BLE_API_VERSION) && NRF_SD_BLE_API_VERSION > 5
+    if (p_adv_report_buffer) {
+        app_ble_gap_scan_data_set(p_adv_report_buffer->p_data);
+    }
+#endif
     //@note: Increment buffer length as internally managed packet type field must be included.
     return ser_sd_transport_cmd_write(p_buffer,
                                       (++buffer_length),
@@ -1897,12 +1905,15 @@ static uint32_t gap_adv_set_configure_rsp_dec(const uint8_t * p_buffer, uint16_t
                                                           (uint8_t *)mp_out_params[0],
                                                           &result_code);
 
+    if (result_code != NRF_SUCCESS)
+    {
+    	app_ble_gap_adv_buf_addr_unregister(mp_out_params[0], false);
+    	app_ble_gap_adv_buf_addr_unregister(mp_out_params[1], false);
+    }
+
     //@note: Should never fail.
     APP_ERROR_CHECK(err_code);
 
-    err_code = app_ble_gap_adv_set_register(*(uint8_t *)mp_out_params[0],
-                                            (uint8_t *)mp_out_params[1],
-                                            (uint8_t *)mp_out_params[2]);
     APP_ERROR_CHECK(err_code);
 
     return result_code;
@@ -1918,13 +1929,19 @@ uint32_t _sd_ble_gap_adv_set_configure(uint8_t *p_adv_handle,
     uint8_t * p_buffer;
     uint32_t  buffer_length = 0;
 
-
-
     tx_buf_alloc(&p_buffer, (uint16_t *)&buffer_length);
 
-    mp_out_params[0] = p_adv_handle;
-    mp_out_params[1] = p_adv_data ? p_adv_data->adv_data.p_data : NULL;
-    mp_out_params[2] = p_adv_data ? p_adv_data->scan_rsp_data.p_data : NULL;
+    if (p_adv_handle)
+    {
+        mp_out_params[0] = p_adv_data->adv_data.p_data;
+        mp_out_params[1] = p_adv_data->scan_rsp_data.p_data;
+    }
+    else
+    {
+        mp_out_params[0] =  NULL;
+        mp_out_params[1] =  NULL;
+    }
+
     const uint32_t err_code = ble_gap_adv_set_configure_req_enc(p_adv_handle, p_adv_data, p_adv_params,
                                                                 &(p_buffer[1]), &buffer_length);
     //@note: Should never fail.

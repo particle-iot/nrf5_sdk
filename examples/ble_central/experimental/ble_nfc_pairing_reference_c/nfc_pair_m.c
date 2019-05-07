@@ -1,30 +1,30 @@
 /**
- * Copyright (c) 2016 - 2018, Nordic Semiconductor ASA
- * 
+ * Copyright (c) 2016 - 2019, Nordic Semiconductor ASA
+ *
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form, except as embedded into a Nordic
  *    Semiconductor ASA integrated circuit in a product or a software update for
  *    such product, must reproduce the above copyright notice, this list of
  *    conditions and the following disclaimer in the documentation and/or other
  *    materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
- * 
+ *
  * 4. This software, with or without modification, must only be used with a
  *    Nordic Semiconductor ASA integrated circuit.
- * 
+ *
  * 5. Any software provided in binary form under this license must not be reverse
  *    engineered, decompiled, modified and/or disassembled.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
  * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -35,7 +35,7 @@
  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  */
 #include <stdint.h>
 #include "nfc_pair_m.h"
@@ -48,9 +48,8 @@
 #include "nfc_ndef_msg_parser.h"
 #include "nfc_le_oob_rec_parser.h"
 #include "ble_m.h"
-#include "ecc.h"
 #include "peer_manager.h"
-#include "nrf_drv_rng.h"
+#include "nrf_ble_lesc.h"
 #include "nrf_sdh_ble.h"
 
 #define NRF_LOG_MODULE_NAME NFC_PAIR_M
@@ -92,11 +91,6 @@ static bool                     m_read_tag              = false;                
 
 static ble_gap_lesc_oob_data_t  m_ble_lesc_oob_peer_data;                                   /**< LESC OOB pairing data. */
 
-__ALIGN(4) static ble_gap_lesc_p256_pk_t m_lesc_pk;                                         /**< LESC ECC Public Key. */
-__ALIGN(4) static ble_gap_lesc_p256_pk_t m_lesc_sk;                                         /**< LESC ECC Secret Key. */
-__ALIGN(4) static ble_gap_lesc_dhkey_t   m_lesc_dhkey;                                      /**< LESC ECC DH Key. */
-__ALIGN(4) static ble_gap_lesc_p256_pk_t m_lesc_peer_pk;                                    /**< LESC Peer ECC Public Key. */
-
 static void ble_nfc_pair_handler(const ble_evt_t * const p_ble_evt, void * p_context);
 
 void nfc_pair_start(void)
@@ -109,25 +103,23 @@ void nfc_pair_stop(void)
     m_read_tag = false;
 }
 
+/**
+ * @brief Function for getting peer OOB data that have been transmitted over NFC.
+ */
+static ble_gap_lesc_oob_data_t * nfc_peer_oob_data_get(uint16_t conn_handle)
+{
+    UNUSED_PARAMETER(conn_handle);
+
+    return &m_ble_lesc_oob_peer_data;
+}
+
 void nfc_init(void)
 {
-    // Initialize encryption module with random number generator use.
-    ecc_init(true);
-
     ret_code_t err_code = adafruit_pn532_init(false);
     APP_ERROR_CHECK(err_code);
 
-    err_code = nrf_drv_rng_init(NULL);
-    APP_ERROR_CHECK(err_code);
+    nrf_ble_lesc_peer_oob_data_handler_set(nfc_peer_oob_data_get);
 
-    // Generate Diffie-Hellman pairing keys.
-    err_code = ecc_p256_keypair_gen(m_lesc_sk.pk, m_lesc_pk.pk);
-    APP_ERROR_CHECK(err_code);
-
-    // Update Peer Manager with new LESC keys.
-    err_code = pm_lesc_public_key_set(&m_lesc_pk);
-    APP_ERROR_CHECK(err_code);
-    
     // Register handler for BLE events.
     NRF_SDH_BLE_OBSERVER(m_ble_observer, NFC_BLE_PAIR_OBSERVER_PRIO, ble_nfc_pair_handler, NULL);
 }
@@ -428,6 +420,9 @@ void nfc_tag_process(void)
                 break;
         }
     }
+
+    err_code = nrf_ble_lesc_request_handler();
+    APP_ERROR_CHECK(err_code);
 }
 
 bool nfc_oob_pairing_tag_match(ble_gap_addr_t const * const p_peer_addr)
@@ -491,38 +486,6 @@ static void ble_nfc_pair_handler(const ble_evt_t * const p_ble_evt, void * p_con
             err_code = sd_ble_gap_auth_key_reply(p_gap_evt->conn_handle,
                                                  BLE_GAP_AUTH_KEY_TYPE_OOB,
                                                  oob_key->tk);
-            APP_ERROR_CHECK(err_code);
-        } break;
-
-        // Upon LESC Diffie_Hellman key request, reply with key computed from device secret key and peer public key.
-        case BLE_GAP_EVT_LESC_DHKEY_REQUEST:
-        {
-            NRF_LOG_INFO("BLE_GAP_EVT_LESC_DHKEY_REQUEST");
-
-            uint16_t conn_handle = ble_get_conn_handle();
-
-            // If LESC OOB pairing is on, perform authentication with OOB data.
-            if (p_ble_evt->evt.gap_evt.params.lesc_dhkey_request.oobd_req)
-            {
-                err_code = sd_ble_gap_lesc_oob_data_set(conn_handle,
-                                                        NULL,
-                                                        &m_ble_lesc_oob_peer_data);
-                APP_ERROR_CHECK(err_code);
-            }
-
-            // Buffer peer Public Key because ECC module arguments must be word aligned.
-            memcpy(&m_lesc_peer_pk.pk[0],
-                   &p_ble_evt->evt.gap_evt.params.lesc_dhkey_request.p_pk_peer->pk[0],
-                   BLE_GAP_LESC_P256_PK_LEN);
-
-            // Compute D-H key.
-            err_code = ecc_p256_shared_secret_compute(&m_lesc_sk.pk[0],
-                                                      &m_lesc_peer_pk.pk[0],
-                                                      &m_lesc_dhkey.key[0]);
-            APP_ERROR_CHECK(err_code);
-
-            // Reply with obtained result.
-            err_code = sd_ble_gap_lesc_dhkey_reply(conn_handle, &m_lesc_dhkey);
             APP_ERROR_CHECK(err_code);
         } break;
     }

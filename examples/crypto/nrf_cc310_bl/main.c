@@ -1,30 +1,30 @@
 /**
- * Copyright (c) 2016 - 2018, Nordic Semiconductor ASA
- * 
+ * Copyright (c) 2016 - 2019, Nordic Semiconductor ASA
+ *
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form, except as embedded into a Nordic
  *    Semiconductor ASA integrated circuit in a product or a software update for
  *    such product, must reproduce the above copyright notice, this list of
  *    conditions and the following disclaimer in the documentation and/or other
  *    materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
- * 
+ *
  * 4. This software, with or without modification, must only be used with a
  *    Nordic Semiconductor ASA integrated circuit.
- * 
+ *
  * 5. Any software provided in binary form under this license must not be reverse
  *    engineered, decompiled, modified and/or disassembled.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
  * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -35,12 +35,13 @@
  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  */
 #include "integration_test_plat_defs.h"
 #include "ssi_pal_mutex_plat.h"
 #include "nrf_cc310_bl_init.h"
 #include "nrf_cc310_bl_ecdsa_verify_secp256r1.h"
+#include "nrf_cc310_bl_ecdsa_verify_secp224r1.h"
 #include "nrf_cc310_bl_hash_common.h"
 #include "nrf_cc310_bl_hash_sha256.h"
 #include <string.h>
@@ -118,6 +119,44 @@ static nrf_cc310_bl_ecc_signature_secp256r1_t ecdsa_signature_secp256r1_faulty =
 };
 
 
+//
+//   For ECDSA verify using secp224r1 and SHA-256
+//
+static nrf_cc310_bl_ecdsa_verify_context_secp224r1_t    ecdsa_context_secp224r1;
+
+// Public key according to rfc6979 for secp224r1 in A.2.4
+// Ux = 00CF08DA5AD719E42707FA431292DEA11244D64FC51610D94B130D6C
+// Uy = EEAB6F3DEBE455E3DBF85416F7030CBD94F34F2D6F232C69F3C1385A
+static nrf_cc310_bl_ecc_public_key_secp224r1_t ecc_public_key_secp224r1 =
+{
+    .x = { 0x00, 0xCF, 0x08, 0xDA, 0x5A, 0xD7, 0x19, 0xE4, 0x27, 0x07, 0xFA, 0x43, 0x12, 0x92,
+           0xDE, 0xA1, 0x12, 0x44, 0xD6, 0x4F, 0xC5, 0x16, 0x10, 0xD9, 0x4B, 0x13, 0x0D, 0x6C },
+    .y = { 0xEE, 0xAB, 0x6F, 0x3D, 0xEB, 0xE4, 0x55, 0xE3, 0xDB, 0xF8, 0x54, 0x16, 0xF7, 0x03,
+           0x0C, 0xBD, 0x94, 0xF3, 0x4F, 0x2D, 0x6F, 0x23, 0x2C, 0x69, 0xF3, 0xC1, 0x38, 0x5A }
+};
+
+// Signature according to rfc6979 for secp224r1 in A.2.4
+// r = 61AA3DA010E8E8406C656BC477A7A7189895E7E840CDFE8FF42307BA
+// s = BC814050DAB5D23770879494F9E0A680DC1AF7161991BDE692B10101
+static nrf_cc310_bl_ecc_signature_secp224r1_t ecdsa_signature_secp224r1 = 
+{
+    .r = { 0x61, 0xAA, 0x3D, 0xA0, 0x10, 0xE8, 0xE8, 0x40, 0x6C, 0x65, 0x6B, 0xC4, 0x77, 0xA7,
+           0xA7, 0x18, 0x98, 0x95, 0xE7, 0xE8, 0x40, 0xCD, 0xFE, 0x8F, 0xF4, 0x23, 0x07, 0xBA },
+    .s = { 0xBC, 0x81, 0x40, 0x50, 0xDA, 0xB5, 0xD2, 0x37, 0x70, 0x87, 0x94, 0x94, 0xF9, 0xE0,
+           0xA6, 0x80, 0xDC, 0x1A, 0xF7, 0x16, 0x19, 0x91, 0xBD, 0xE6, 0x92, 0xB1, 0x01, 0x01 }
+};
+
+
+// Invalid signature with some data set to zero.
+static nrf_cc310_bl_ecc_signature_secp224r1_t ecdsa_signature_secp224r1_faulty = 
+{
+    .r = { 0x61, 0xAA, 0x3D, 0xA0, 0x10, 0xE8, 0xE8, 0x40, 0x6C, 0x65, 0x6B, 0xC4, 0x77, 0xA7,
+           0xA7, 0x18, 0x98, 0x95, 0xE7, 0xE8, 0x40, 0xCD, 0xFE, 0x8F, 0xF0, 0x23, 0x07, 0xBA },
+    .s = { 0xBC, 0x81, 0x40, 0x50, 0xDA, 0xB5, 0xD2, 0x37, 0x70, 0x87, 0x94, 0x94, 0xF9, 0xE0,
+           0xA6, 0x80, 0xDC, 0x1A, 0xF7, 0x16, 0x19, 0x91, 0xBD, 0xE6, 0x92, 0xB1, 0x01, 0x01 }
+};
+
+
 void print_array(char const * const name, uint8_t const * const p_src, size_t size)
 {
     INTEG_TEST_PRINT("Array %s:\r\n", name);
@@ -182,11 +221,11 @@ int main(void)
     
     
     //
-    // Valid ECDSA verify test
+    // Valid ECDSA secp256r1 verify test
     //
     
     INTEG_TEST_PRINT("\r\n\r\n====================================\r\n");
-    INTEG_TEST_PRINT("Testing valid ECDSA verify secp256r1\r\n\r\n");
+    INTEG_TEST_PRINT("Testing valid ECDSA secp256r1 verify\r\n\r\n");
     
     INTEG_TEST_PRINT("Initializing ecdsa verify context secp256r1\r\n");
     err_code = nrf_cc310_bl_ecdsa_verify_init_secp256r1(&ecdsa_context_secp256r1, &ecc_public_key_secp256r1);
@@ -209,11 +248,11 @@ int main(void)
     }
     
     //
-    // Invalid ECDSA verify test (wrong signature)
+    // Invalid ECDSA secp256r1 verify test (wrong signature)
     //
     
     INTEG_TEST_PRINT("\r\n\r\n=======================================================\r\n");
-    INTEG_TEST_PRINT("Testing ECDSA verify failure scenario (wrong signature)\r\n\r\n");
+    INTEG_TEST_PRINT("Testing ECDSA secp256r1 verify failure scenario (wrong signature)\r\n\r\n");
     
     INTEG_TEST_PRINT("Initializing ecdsa verify context secp256r1\r\n");
     err_code = nrf_cc310_bl_ecdsa_verify_init_secp256r1(&ecdsa_context_secp256r1, &ecc_public_key_secp256r1);
@@ -238,11 +277,11 @@ int main(void)
     
     
     //
-    // Invalid ECDSA verify test (wrong hash)
+    // Invalid ECDSA secp256r1 verify test (wrong hash)
     //
     
     INTEG_TEST_PRINT("\r\n\r\n==================================================\r\n");
-    INTEG_TEST_PRINT("Testing ECDSA verify failure scenario (wrong hash)\r\n\r\n");
+    INTEG_TEST_PRINT("Testing ECDSA secp256r1 verify failure scenario (wrong hash)\r\n\r\n");
     
     INTEG_TEST_PRINT("Initializing ecdsa verify context secp256r1\r\n");
     err_code = nrf_cc310_bl_ecdsa_verify_init_secp256r1(&ecdsa_context_secp256r1, &ecc_public_key_secp256r1);
@@ -252,6 +291,91 @@ int main(void)
     INTEG_TEST_PRINT("Executing ecdsa verify secp256r1 with wrong hash\r\n");
     err_code = nrf_cc310_bl_ecdsa_verify_hash_secp256r1(&ecdsa_context_secp256r1, 
                                                         &ecdsa_signature_secp256r1, 
+                                                        hash_digest_faulty, 
+                                                        sizeof(nrf_cc310_bl_hash_digest_sha256_t));
+    if (err_code == SASI_SUCCESS)
+    {
+        INTEG_TEST_PRINT("Verification not supposed to be successful!\r\n");
+        test_check(err_code);
+        
+    }
+    else
+    {
+        INTEG_TEST_PRINT("Verification failed as it should!\r\n");
+    }
+    
+    
+    //
+    // Valid ECDSA secp224r1 verify test
+    //
+    
+    INTEG_TEST_PRINT("\r\n\r\n====================================\r\n");
+    INTEG_TEST_PRINT("Testing valid ECDSA secp224r1 verify\r\n\r\n");
+    
+    INTEG_TEST_PRINT("Initializing ecdsa verify context secp224r1\r\n");
+    err_code = nrf_cc310_bl_ecdsa_verify_init_secp224r1(&ecdsa_context_secp224r1, &ecc_public_key_secp224r1);
+    test_check(err_code);
+    
+    
+    INTEG_TEST_PRINT("Executing ecdsa verify secp224r1\r\n");
+    err_code = nrf_cc310_bl_ecdsa_verify_hash_secp224r1(&ecdsa_context_secp224r1, 
+                                                        &ecdsa_signature_secp224r1, 
+                                                        hash_digest, 
+                                                        sizeof(nrf_cc310_bl_hash_digest_sha256_t));
+    if (err_code == SASI_SUCCESS)
+    {
+        INTEG_TEST_PRINT("Verification was successful!\r\n");
+    }
+    else
+    {
+        INTEG_TEST_PRINT("Verification failed!\r\n");
+        test_check(err_code);
+    }
+    
+    //
+    // Invalid ECDSA secp224r1 verify test (wrong signature)
+    //
+    
+    INTEG_TEST_PRINT("\r\n\r\n=======================================================\r\n");
+    INTEG_TEST_PRINT("Testing ECDSA secp224r1 verify failure scenario (wrong signature)\r\n\r\n");
+    
+    INTEG_TEST_PRINT("Initializing ecdsa verify context secp224r1\r\n");
+    err_code = nrf_cc310_bl_ecdsa_verify_init_secp224r1(&ecdsa_context_secp224r1, &ecc_public_key_secp224r1);
+    test_check(err_code);
+    
+    
+    INTEG_TEST_PRINT("Executing ecdsa verify secp224r1\r\n");
+    err_code = nrf_cc310_bl_ecdsa_verify_hash_secp224r1(&ecdsa_context_secp224r1, 
+                                                        &ecdsa_signature_secp224r1_faulty, 
+                                                        hash_digest, 
+                                                        sizeof(nrf_cc310_bl_hash_digest_sha256_t));
+    if (err_code == SASI_SUCCESS)
+    {
+        INTEG_TEST_PRINT("Verification not supposed to be successful!\r\n");
+        test_check(err_code);
+        
+    }
+    else
+    {
+        INTEG_TEST_PRINT("Verification failed as it should!\r\n");
+    }
+    
+    
+    //
+    // Invalid ECDSA secp224r1 verify test (wrong hash)
+    //
+    
+    INTEG_TEST_PRINT("\r\n\r\n==================================================\r\n");
+    INTEG_TEST_PRINT("Testing ECDSA secp224r1 verify failure scenario (wrong hash)\r\n\r\n");
+    
+    INTEG_TEST_PRINT("Initializing ecdsa verify context secp224r1\r\n");
+    err_code = nrf_cc310_bl_ecdsa_verify_init_secp224r1(&ecdsa_context_secp224r1, &ecc_public_key_secp224r1);
+    test_check(err_code);
+    
+    
+    INTEG_TEST_PRINT("Executing ecdsa verify secp224r1 with wrong hash\r\n");
+    err_code = nrf_cc310_bl_ecdsa_verify_hash_secp224r1(&ecdsa_context_secp224r1, 
+                                                        &ecdsa_signature_secp224r1, 
                                                         hash_digest_faulty, 
                                                         sizeof(nrf_cc310_bl_hash_digest_sha256_t));
     if (err_code == SASI_SUCCESS)

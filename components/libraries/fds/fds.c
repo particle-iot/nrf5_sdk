@@ -1,30 +1,30 @@
 /**
- * Copyright (c) 2015 - 2018, Nordic Semiconductor ASA
- * 
+ * Copyright (c) 2015 - 2019, Nordic Semiconductor ASA
+ *
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form, except as embedded into a Nordic
  *    Semiconductor ASA integrated circuit in a product or a software update for
  *    such product, must reproduce the above copyright notice, this list of
  *    conditions and the following disclaimer in the documentation and/or other
  *    materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
- * 
+ *
  * 4. This software, with or without modification, must only be used with a
  *    Nordic Semiconductor ASA integrated circuit.
- * 
+ *
  * 5. Any software provided in binary form under this license must not be reverse
  *    engineered, decompiled, modified and/or disassembled.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
  * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -35,7 +35,7 @@
  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  */
 #include "sdk_common.h"
 #if NRF_MODULE_ENABLED(FDS)
@@ -1628,16 +1628,21 @@ ret_code_t fds_register(fds_cb_t cb)
 
 static uint32_t flash_end_addr(void)
 {
-    uint32_t const bootloader_addr = NRF_UICR->NRFFW[0];
+    uint32_t const bootloader_addr = BOOTLOADER_ADDRESS;
     uint32_t const page_sz         = NRF_FICR->CODEPAGESIZE;
-#ifndef NRF52810_XXAA
-    uint32_t const code_sz         = NRF_FICR->CODESIZE;
+
+#if defined(NRF52810_XXAA) || defined(NRF52811_XXAA)
+    // Hardcode the number of flash pages, necessary for SoC emulation.
+    // nRF52810 on nRF52832 and
+    // nRF52811 on nRF52840
+    uint32_t const code_sz = 48;
 #else
-    // Number of flash pages, necessary to emulate the NRF52810 on NRF52832.
-    uint32_t const code_sz         = 48;
+   uint32_t const code_sz = NRF_FICR->CODESIZE;
 #endif
 
-    return (bootloader_addr != 0xFFFFFFFF) ? bootloader_addr : (code_sz * page_sz);
+    uint32_t end_addr = (bootloader_addr != 0xFFFFFFFF) ? bootloader_addr : (code_sz * page_sz);
+
+    return end_addr - (FDS_PHY_PAGES_RESERVED * FDS_PHY_PAGE_SIZE * sizeof(uint32_t));
 }
 
 

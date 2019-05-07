@@ -1,30 +1,30 @@
 /**
- * Copyright (c) 2016 - 2018, Nordic Semiconductor ASA
- * 
+ * Copyright (c) 2016 - 2019, Nordic Semiconductor ASA
+ *
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form, except as embedded into a Nordic
  *    Semiconductor ASA integrated circuit in a product or a software update for
  *    such product, must reproduce the above copyright notice, this list of
  *    conditions and the following disclaimer in the documentation and/or other
  *    materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
- * 
+ *
  * 4. This software, with or without modification, must only be used with a
  *    Nordic Semiconductor ASA integrated circuit.
- * 
+ *
  * 5. Any software provided in binary form under this license must not be reverse
  *    engineered, decompiled, modified and/or disassembled.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
  * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -35,7 +35,7 @@
  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  */
 #include <stdbool.h>
 #include <stdint.h>
@@ -46,8 +46,7 @@
 #include "fds.h"
 #include "modes.h"
 #include "nrf_crypto.h"
-
-#define TK_ROLLOVER 0x10000
+#include "nrf_soc.h"
 
 #define NONCE_SIZE                  (6)
 #define TAG_SIZE                    (2)
@@ -100,11 +99,16 @@ static nrf_crypto_aead_context_t                    m_aead_context;
 static nrf_crypto_ecc_key_pair_generate_context_t   ecc_key_pair_generate_context;
 static nrf_crypto_ecdh_context_t                    ecdh_context;
 
+/**@brief Generates a temporary key with the Identity key. */
+static void temp_key_generate(uint8_t slot_no);
+
 /**@brief Generates a EID with the Temporary Key*/
 static void eid_generate(uint8_t slot_no)
 {
     ret_code_t  err_code;
     size_t      ciphertext_size = AES_ECB_CIPHERTEXT_LENGTH;
+
+    temp_key_generate(slot_no);
 
     memset(m_security_slot[slot_no].aes_ecb_tk.cleartext, 0, ESCS_AES_KEY_SIZE);
     m_security_slot[slot_no].aes_ecb_tk.cleartext[11] = m_security_slot[slot_no].timing.k_scaler;
@@ -171,19 +175,28 @@ static void temp_key_generate(uint8_t slot_no)
 }
 
 
+/**@brief See if EID should be re-calculated.
+ */
 static void check_rollovers_and_update_eid(uint8_t slot_no)
 {
-    if (m_security_slot[slot_no].timing.time_counter % TK_ROLLOVER == 0)
+    static uint32_t last_invocation_time_counter = 0;
+    uint32_t scaler = 2 << (m_security_slot[slot_no].timing.k_scaler - 1);
+    uint32_t diff;
+
+    if (last_invocation_time_counter == 0)
     {
-        temp_key_generate(slot_no);
+        last_invocation_time_counter = m_security_slot[slot_no].timing.time_counter;
     }
-    /*lint -save -e573 */
-    if ((m_security_slot[slot_no].timing.time_counter %
-         (2 << (m_security_slot[slot_no].timing.k_scaler - 1))) == 0)
+
+    diff = m_security_slot[slot_no].timing.time_counter - last_invocation_time_counter;
+
+    if (diff >= scaler)
     {
+        // Store to last scaler-aligned time.
+        last_invocation_time_counter = (m_security_slot[slot_no].timing.time_counter / scaler) * scaler;
+
         eid_generate(slot_no);
     }
-    /*lint -restore */
 }
 
 
@@ -253,7 +266,6 @@ void es_security_eid_slots_restore(uint8_t         slot_no,
     memcpy(m_security_slot[slot_no].aes_ecb_ik.key, p_ik, ESCS_AES_KEY_SIZE);
     m_security_slot[slot_no].is_occupied = true;
     m_security_callback(slot_no, ES_SECURITY_MSG_IK);
-    temp_key_generate(slot_no);
     eid_generate(slot_no);
 }
 
@@ -338,7 +350,6 @@ void es_security_shared_ik_receive(uint8_t slot_no, uint8_t * p_encrypted_ik, ui
 
     APP_ERROR_CHECK(err_code);
 
-    temp_key_generate(slot_no);
     eid_generate(slot_no);
 
     m_security_callback(slot_no, ES_SECURITY_MSG_IK);
@@ -422,7 +433,6 @@ void es_security_client_pub_ecdh_receive(uint8_t slot_no, uint8_t * p_pub_ecdh, 
     // Truncate the key material to 128 bits to convert it to an AES-128 secret key (Identity key).
     memcpy(m_security_slot[slot_no].aes_ecb_ik.key, key_material, ESCS_AES_KEY_SIZE);
 
-    temp_key_generate(slot_no);
     eid_generate(slot_no);
 
     m_security_callback(slot_no, ES_SECURITY_MSG_ECDH);

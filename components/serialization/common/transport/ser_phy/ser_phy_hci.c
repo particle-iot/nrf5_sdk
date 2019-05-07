@@ -1,30 +1,30 @@
 /**
- * Copyright (c) 2014 - 2018, Nordic Semiconductor ASA
- * 
+ * Copyright (c) 2014 - 2019, Nordic Semiconductor ASA
+ *
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form, except as embedded into a Nordic
  *    Semiconductor ASA integrated circuit in a product or a software update for
  *    such product, must reproduce the above copyright notice, this list of
  *    conditions and the following disclaimer in the documentation and/or other
  *    materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
- * 
+ *
  * 4. This software, with or without modification, must only be used with a
  *    Nordic Semiconductor ASA integrated circuit.
- * 
+ *
  * 5. Any software provided in binary form under this license must not be reverse
  *    engineered, decompiled, modified and/or disassembled.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
  * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -35,7 +35,7 @@
  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  */
 #include <stddef.h>
 #include <string.h>
@@ -51,6 +51,20 @@
 #include "nrf_soc.h"
 #include "ser_config.h"
 #include "ser_phy_debug_comm.h"
+
+#include "nrf_sdh.h"
+#include "ser_hal_transport.h"
+#include "app_scheduler.h"
+
+#ifdef SER_CONNECTIVITY
+#include "ser_conn_handlers.h"
+#include "ser_conn_reset_cmd_decoder.h"
+#endif /* SER_CONNECTIVITY */
+
+#ifdef BLE_STACK_SUPPORT_REQD
+#include "nrf_sdm.h"
+#endif /* BLE_STACK_SUPPORT_REQD */
+
 #define NRF_LOG_MODULE_NAME sphy_hci
 #include "nrf_log.h"
 NRF_LOG_MODULE_REGISTER();
@@ -93,6 +107,10 @@ NRF_LOG_MODULE_REGISTER();
 #define HCI_LINK_CONTROL_TIMEOUT     1u                                                /**< Default link control timeout. */
 #endif  /* HCI_LINK_CONTROL */
 
+#define PACKET_TYPE_STR(type)\
+    ((type == PKT_TYPE_ACK) ? "ACK" :\
+    ((type ==PKT_TYPE_LINK_CONTROL) ? "Link Control" : \
+    ((type ==PKT_TYPE_VENDOR_SPECIFIC) ? "Vendor Specific" : "Reset")))
 
 #define RETRANSMISSION_TIMEOUT_IN_TICKS (APP_TIMER_TICKS(RETRANSMISSION_TIMEOUT_IN_ms)) /**< Retransmission timeout for application packet in units of timer ticks. */
 #define MAX_RETRY_COUNT                 5                                      /**< Max retransmission retry count for application packets. */
@@ -191,6 +209,7 @@ _static uint8_t m_tx_ack_packet[PKT_HDR_SIZE];
 #ifdef HCI_LINK_CONTROL
 _static uint8_t m_tx_link_control_header[PKT_HDR_SIZE];
 _static uint8_t m_tx_link_control_payload[HCI_PKT_CONFIG_SIZE - PKT_HDR_SIZE];
+static bool m_cfg_sent;
 #endif /* HCI_LINK_CONTROL */
 
 _static uint32_t m_packet_ack_number; // Sequence number counter of the packet expected to be received
@@ -664,6 +683,7 @@ static void ack_transmit(void)
     pkt_header.num_of_bytes = PKT_HDR_SIZE;
     DEBUG_EVT_SLIP_ACK_TX(0);
     err_code = ser_phy_hci_slip_tx_pkt_send(&pkt_header, NULL, NULL);
+    NRF_LOG_DEBUG("Start sending ACK.");
     ser_phy_hci_assert(err_code == NRF_SUCCESS);
 
     return;
@@ -734,11 +754,11 @@ static void error_callback(void)
 
     DEBUG_EVT_HCI_PHY_EVT_TX_ERROR(0);
 
+    NRF_LOG_DEBUG("no ack");
     event.evt_type = SER_PHY_EVT_HW_ERROR;
     event.evt_params.hw_error.p_buffer = m_p_tx_payload;
     ser_phy_event_callback(event);
 }
-
 
 static void hci_slip_event_handler(ser_phy_hci_slip_evt_t * p_event)
 {
@@ -748,7 +768,7 @@ static void hci_slip_event_handler(ser_phy_hci_slip_evt_t * p_event)
 
     if ( p_event->evt_type == SER_PHY_HCI_SLIP_EVT_PKT_SENT )
     {
-        NRF_LOG_DEBUG("EVT_PKT_SENT");
+        NRF_LOG_DEBUG("EVT:Tx packet sent.");
 
         DEBUG_EVT_SLIP_PACKET_TXED(0);
         event.evt_source                    = HCI_SLIP_EVT;
@@ -764,7 +784,7 @@ static void hci_slip_event_handler(ser_phy_hci_slip_evt_t * p_event)
     }
     else if ( p_event->evt_type == SER_PHY_HCI_SLIP_EVT_ACK_SENT )
     {
-        NRF_LOG_DEBUG("EVT_ACK_SENT");
+        NRF_LOG_DEBUG("EVT:ACK sent.");
 
         DEBUG_EVT_SLIP_ACK_TXED(0);
         event.evt_source                    = HCI_SLIP_EVT;
@@ -793,12 +813,16 @@ static void hci_slip_event_handler(ser_phy_hci_slip_evt_t * p_event)
             event.evt.ser_phy_slip_evt.evt_params.received_pkt.p_buffer,
             event.evt.ser_phy_slip_evt.evt_params.received_pkt.num_of_bytes);
 
-        NRF_LOG_DEBUG("EVT_PKT_RECEIVED 0x%X/%u", packet_type,
+        NRF_LOG_DEBUG("EVT:RX %s packet (length:%u)", PACKET_TYPE_STR(packet_type),
             p_event->evt_params.received_pkt.num_of_bytes);
 
         if (packet_type == PKT_TYPE_RESET)
         {
+#if defined(SER_CONNECTIVITY) && defined(SER_PHY_HCI_USB_CDC)
+            (void)soft_reset_trigger();
+#else
             NVIC_SystemReset();
+#endif
         }
         else if (packet_type == PKT_TYPE_ACK )
         {
@@ -892,6 +916,7 @@ static void hci_pkt_send(void)
     pkt_crc.num_of_bytes     = PKT_CRC_SIZE;
     DEBUG_EVT_SLIP_PACKET_TX(0);
     err_code = ser_phy_hci_slip_tx_pkt_send(&pkt_header, &pkt_payload, &pkt_crc);
+    NRF_LOG_DEBUG("Started TX packet (payload %d).", m_tx_payload_length);
     ser_phy_hci_assert(err_code == NRF_SUCCESS);
 
     return;
@@ -1055,6 +1080,7 @@ static void hci_tx_fsm_event_process(hci_evt_t * p_event)
                 // m_tx_retx_counter++; // global retransmissions counter
                 if (m_tx_retry_count)
                 {
+                    NRF_LOG_DEBUG("Timeout, no ACK. Retrying tx packet.");
                     hci_pkt_send();
                     DEBUG_HCI_RETX(0);
                     m_hci_tx_fsm_state = HCI_TX_STATE_WAIT_FOR_ACK_OR_TX_END;
@@ -1063,6 +1089,7 @@ static void hci_tx_fsm_event_process(hci_evt_t * p_event)
                 {
                     error_callback();
                     m_hci_tx_fsm_state = HCI_TX_STATE_SEND;
+                    NRF_LOG_WARNING("Timeout, no ACK. Dropping.");
                 }
             }
             break;
@@ -1414,6 +1441,7 @@ static void hci_link_control_event_handler(hci_evt_t * p_event)
                         m_hci_rx_fsm_state  = HCI_RX_STATE_DISABLE;
                         m_hci_other_side_active = false;
                     }
+                    NRF_LOG_DEBUG("Link control. Sync received, sending Sync Response.");
                     hci_link_control_pkt_send();
                     hci_timeout_setup(HCI_LINK_CONTROL_TIMEOUT); // Need to trigger transmitting SYNC messages
                     break;
@@ -1422,14 +1450,24 @@ static void hci_link_control_event_handler(hci_evt_t * p_event)
                     {
                         m_hci_mode                  = HCI_MODE_INITIALIZED;
                         m_hci_link_control_next_pkt = HCI_PKT_CONFIG;
+                        m_cfg_sent = false;
                     }
+                    NRF_LOG_DEBUG("Link control. Sync Resposnse recieved.");
                     break;
                 case HCI_PKT_CONFIG:
                     if (m_hci_mode != HCI_MODE_UNINITIALIZED)
                     {
-                        m_hci_link_control_next_pkt = HCI_PKT_CONFIG_RSP;
+                        if (m_cfg_sent)
+                        {
+                            m_hci_link_control_next_pkt = HCI_PKT_CONFIG_RSP;
+                            m_hci_other_side_active = true;
+                        }
+                        else
+                        {
+                            m_hci_link_control_next_pkt = HCI_PKT_CONFIG;
+                        }
                         hci_link_control_pkt_send();
-                        m_hci_other_side_active = true;
+                        m_cfg_sent = true;
                     }
                     break;
                 case HCI_PKT_CONFIG_RSP:
@@ -1466,6 +1504,7 @@ static void hci_link_control_event_handler(hci_evt_t * p_event)
                 case HCI_MODE_INITIALIZED:
                     m_hci_link_control_next_pkt = HCI_PKT_CONFIG;
                     hci_link_control_pkt_send();
+                    m_cfg_sent = true;
                     hci_timeout_setup(HCI_LINK_CONTROL_TIMEOUT);
                     break;
                 case HCI_MODE_ACTIVE:
@@ -1548,6 +1587,7 @@ uint32_t ser_phy_rx_buf_set(uint8_t * p_buffer)
 /* ser_phy API function */
 uint32_t ser_phy_tx_pkt_send(const uint8_t * p_buffer, uint16_t num_of_bytes)
 {
+    NRF_LOG_DEBUG("TX request (%d bytes)", num_of_bytes);
     uint32_t  status = NRF_SUCCESS;
     hci_evt_t event;
 
@@ -1573,14 +1613,10 @@ uint32_t ser_phy_tx_pkt_send(const uint8_t * p_buffer, uint16_t num_of_bytes)
     return status;
 }
 
-
-static uint32_t  hci_timer_init(void)
+static uint32_t hci_timer_reset(void)
 {
-    uint32_t err_code = NRF_SUCCESS;
-
 #ifdef HCI_APP_TIMER
-
-    err_code = app_timer_create(&m_app_timer_id, APP_TIMER_MODE_REPEATED, hci_timeout_handler);
+    ret_code_t err_code = app_timer_stop(m_app_timer_id);
 
     if (err_code != NRF_SUCCESS)
     {
@@ -1593,7 +1629,6 @@ static uint32_t  hci_timer_init(void)
     {
         return NRF_ERROR_INTERNAL;
     }
-
 #else
 
     // Configure TIMER for compare[1] event
@@ -1603,6 +1638,7 @@ static uint32_t  hci_timer_init(void)
 
     // Clear TIMER
     HCI_TIMER->TASKS_CLEAR = 1;
+    HCI_TIMER->TASKS_STOP = 1;
 
     // Enable interrupt
     HCI_TIMER->INTENCLR = 0xFFFFFFFF;
@@ -1613,11 +1649,51 @@ static uint32_t  hci_timer_init(void)
     NVIC_EnableIRQ(HCI_TIMER_IRQn);
 
 #endif
-
-    return err_code;
-
+    return NRF_SUCCESS;
 }
 
+static uint32_t  hci_timer_init(void)
+{
+
+#ifdef HCI_APP_TIMER
+    uint32_t err_code = NRF_SUCCESS;
+
+    err_code = app_timer_create(&m_app_timer_id, APP_TIMER_MODE_REPEATED, hci_timeout_handler);
+
+    if (err_code != NRF_SUCCESS)
+    {
+        return NRF_ERROR_INTERNAL;
+    }
+#endif
+    return hci_timer_reset();
+}
+
+void ser_phy_hci_reset(void)
+{
+    m_p_tx_payload = NULL;
+    m_p_rx_buffer = NULL;
+    
+    nrf_queue_reset(&m_tx_evt_queue);
+    nrf_queue_reset(&m_rx_evt_queue);
+
+    (void)hci_timer_reset();
+    m_packet_ack_number = INITIAL_ACK_NUMBER_EXPECTED;
+    m_packet_seq_number = INITIAL_SEQ_NUMBER;
+
+#ifndef HCI_LINK_CONTROL
+    m_hci_tx_fsm_state  = HCI_TX_STATE_SEND;
+    m_hci_rx_fsm_state  = HCI_RX_STATE_RECEIVE;
+#else
+    m_hci_tx_fsm_state  = HCI_TX_STATE_DISABLE;
+    m_hci_rx_fsm_state  = HCI_RX_STATE_DISABLE;
+    hci_timeout_setup(HCI_LINK_CONTROL_TIMEOUT);// Trigger sending SYNC messages
+    m_hci_link_control_next_pkt = HCI_PKT_SYNC;
+    m_hci_mode              = HCI_MODE_UNINITIALIZED;
+    m_hci_other_side_active = false;
+    m_rx_fsm_idle_flag = true;
+    m_hci_global_enable_flag = true;
+#endif /*HCI_LINK_CONTROL*/
+}
 
 /* ser_phy API function */
 uint32_t ser_phy_open(ser_phy_events_handler_t events_handler)
@@ -1634,15 +1710,14 @@ uint32_t ser_phy_open(ser_phy_events_handler_t events_handler)
         return NRF_ERROR_NULL;
     }
 
+    m_ser_phy_callback  = events_handler;
+
     err_code = hci_timer_init();
 
     if (err_code != NRF_SUCCESS)
     {
         return NRF_ERROR_INTERNAL;
     }
-
-    nrf_queue_reset(&m_tx_evt_queue);
-    nrf_queue_reset(&m_rx_evt_queue);
 
     err_code = ser_phy_hci_slip_open(hci_slip_event_handler);
 
@@ -1653,18 +1728,7 @@ uint32_t ser_phy_open(ser_phy_events_handler_t events_handler)
 
     if (err_code == NRF_SUCCESS)
     {
-        m_packet_ack_number = INITIAL_ACK_NUMBER_EXPECTED;
-        m_packet_seq_number = INITIAL_SEQ_NUMBER;
-        m_ser_phy_callback  = events_handler;
-
-#ifndef HCI_LINK_CONTROL
-        m_hci_tx_fsm_state  = HCI_TX_STATE_SEND;
-        m_hci_rx_fsm_state  = HCI_RX_STATE_RECEIVE;
-#else
-        hci_timeout_setup(HCI_LINK_CONTROL_TIMEOUT);// Trigger sending SYNC messages
-        m_hci_mode              = HCI_MODE_UNINITIALIZED;
-        m_hci_other_side_active = false;
-#endif /*HCI_LINK_CONTROL*/
+        ser_phy_hci_reset();
     }
     return err_code;
 }
