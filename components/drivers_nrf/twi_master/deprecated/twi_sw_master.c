@@ -383,7 +383,8 @@ static bool twi_master_clock_byte(uint_fast8_t databyte)
     // Pull SCL high and wait a moment for SDA line to settle
     // Make sure slave is not stretching the clock
     transfer_succeeded &= twi_master_wait_while_scl_low();
-
+    TWI_DELAY(); //hack to compensate hardware timing bug
+    
     // Read ACK/NACK. NACK == 1, ACK == 0
     transfer_succeeded &= !(TWI_SDA_READ());
 
