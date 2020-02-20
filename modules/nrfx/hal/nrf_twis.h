@@ -135,7 +135,7 @@ typedef enum
  * Defined to make it simple to change if EasyDMA would be updated to support more data in
  * the future devices to.
  */
-typedef uint8_t nrf_twis_amount_t;
+typedef uint16_t nrf_twis_amount_t;
 
 /**
  * @brief Smallest variable type to hold TWI address
