@@ -717,7 +717,20 @@ static inline void sustate_set(app_usbd_sustate_t sustate)
             {
                 .event_handler = app_usbd_hfclk_ready
             };
+            // Particle: otherwise we have a race condition coming out of suspended state
+#if !APP_USBD_CONFIG_EVENT_QUEUE_ENABLE
+            if (sustate == SUSTATE_RESUMING)
+            {
+                m_sustate = sustate;
+            }
+#endif // !APP_USBD_CONFIG_EVENT_QUEUE_ENABLE
             nrf_drv_clock_hfclk_request(&clock_handler_item);
+#if !APP_USBD_CONFIG_EVENT_QUEUE_ENABLE
+            if (sustate == SUSTATE_RESUMING)
+            {
+                return;
+            }
+#endif // !APP_USBD_CONFIG_EVENT_QUEUE_ENABLE
         }
         else
         {
