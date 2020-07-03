@@ -73,6 +73,10 @@ debugger. */
 variable. */
 static UBaseType_t uxCriticalNesting = 0;
 
+/* Capture original BASEPRI value to restore after
+exiting critical section */
+static uint32_t uxSavedBasePri = 0;
+
 /*
  * Setup the timer to generate the tick interrupts.  The implementation in this
  * file is weak to allow application writers to change the timer used to
@@ -260,8 +264,11 @@ void vPortEndScheduler( void )
 
 void vPortEnterCritical( void )
 {
-    portDISABLE_INTERRUPTS();
-    uxCriticalNesting++;
+    uint32_t basePri = ulPortRaiseBASEPRI();
+    if ( uxCriticalNesting++ == 0 )
+    {
+        uxSavedBasePri = basePri;
+    }
 
     /* This is not the interrupt safe version of the enter critical function so
     assert() if it is being called from an interrupt context.  Only API
@@ -281,7 +288,7 @@ void vPortExitCritical( void )
     uxCriticalNesting--;
     if ( uxCriticalNesting == 0 )
     {
-        portENABLE_INTERRUPTS();
+        vPortSetBASEPRI(uxSavedBasePri);
     }
 }
 
