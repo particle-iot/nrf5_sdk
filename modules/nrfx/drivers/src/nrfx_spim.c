@@ -250,7 +250,7 @@ nrfx_err_t nrfx_spim_init(nrfx_spim_t  const * const p_instance,
                  NRF_GPIO_PIN_DIR_OUTPUT,
                  NRF_GPIO_PIN_INPUT_CONNECT,
                  NRF_GPIO_PIN_NOPULL,
-                 NRF_GPIO_PIN_S0S1,
+                 NRF_GPIO_PIN_H0H1,
                  NRF_GPIO_PIN_NOSENSE);
     // - MOSI (optional) - output with initial value 0,
     if (p_config->mosi_pin != NRFX_SPIM_PIN_NOT_USED)
