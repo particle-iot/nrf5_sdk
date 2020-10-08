@@ -257,7 +257,12 @@ nrfx_err_t nrfx_spim_init(nrfx_spim_t  const * const p_instance,
     {
         mosi_pin = p_config->mosi_pin;
         nrf_gpio_pin_clear(mosi_pin);
-        nrf_gpio_cfg_output(mosi_pin);
+        nrf_gpio_cfg(mosi_pin,
+                 NRF_GPIO_PIN_DIR_OUTPUT,
+                 NRF_GPIO_PIN_INPUT_DISCONNECT,
+                 NRF_GPIO_PIN_NOPULL,
+                 NRF_GPIO_PIN_H0H1,
+                 NRF_GPIO_PIN_NOSENSE);
     }
     else
     {
