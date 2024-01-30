@@ -950,6 +950,22 @@ typedef struct {                                /*!< (@ 0x10001000) UICR Structu
                                                                     voltage in high voltage mode                               */
 } NRF_UICR_Type;                                /*!< Size = 776 (0x308)                                                        */
 
+/* =========================================================================================================================== */
+/* ================                                         APPROTECT                                         ================ */
+/* =========================================================================================================================== */
+
+
+/**
+  * @brief Access Port Protection (APPROTECT)
+  */
+
+typedef struct {                                /*!< (@ 0x40000000) APPROTECT Structure                                        */
+  __IM  uint32_t  RESERVED[340];
+  __IOM uint32_t  FORCEPROTECT;                 /*!< (@ 0x00000550) Software force enable APPROTECT mechanism until
+                                                                    next reset.                                                */
+  __IM  uint32_t  RESERVED1;
+  __IOM uint32_t  DISABLE;                      /*!< (@ 0x00000558) Software disable APPROTECT mechanism                       */
+} NRF_APPROTECT_Type;                           /*!< Size = 1372 (0x55c)                                                       */
 
 
 /* =========================================================================================================================== */
@@ -2744,6 +2760,7 @@ typedef struct {                                /*!< (@ 0x5002A000) CRYPTOCELL S
 
 #define NRF_FICR_BASE               0x10000000UL
 #define NRF_UICR_BASE               0x10001000UL
+#define NRF_APPROTECT_BASE          0x40000000UL
 #define NRF_CLOCK_BASE              0x40000000UL
 #define NRF_POWER_BASE              0x40000000UL
 #define NRF_P0_BASE                 0x50000000UL
@@ -2830,6 +2847,7 @@ typedef struct {                                /*!< (@ 0x5002A000) CRYPTOCELL S
 
 #define NRF_FICR                    ((NRF_FICR_Type*)          NRF_FICR_BASE)
 #define NRF_UICR                    ((NRF_UICR_Type*)          NRF_UICR_BASE)
+#define NRF_APPROTECT               ((NRF_APPROTECT_Type*)     NRF_APPROTECT_BASE)
 #define NRF_CLOCK                   ((NRF_CLOCK_Type*)         NRF_CLOCK_BASE)
 #define NRF_POWER                   ((NRF_POWER_Type*)         NRF_POWER_BASE)
 #define NRF_P0                      ((NRF_GPIO_Type*)          NRF_P0_BASE)
