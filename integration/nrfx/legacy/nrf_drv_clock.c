@@ -343,7 +343,7 @@ bool nrf_drv_clock_hfclk_is_running(void)
 #ifdef SOFTDEVICE_PRESENT
     if (nrf_sdh_is_enabled())
     {
-        uint32_t is_running;
+        uint32_t is_running = 0;
         UNUSED_VARIABLE(sd_clock_hfclk_is_running(&is_running));
         return (is_running ? true : false);
     }

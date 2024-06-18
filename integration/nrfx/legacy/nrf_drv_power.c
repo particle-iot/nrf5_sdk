@@ -258,7 +258,7 @@ ret_code_t nrf_drv_power_usbevt_init(nrf_drv_power_usbevt_config_t const * p_con
             return err_code;
         }
 
-        uint32_t regstatus;
+        uint32_t regstatus = 0;
         err_code = sd_power_usbregstatus_get(&regstatus);
         ASSERT(err_code == NRF_SUCCESS);
         if (err_code != NRF_SUCCESS)
