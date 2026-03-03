@@ -7250,7 +7250,7 @@
 // <i> This may limit throughput if a lot of binary data is sent, but in terminal mode operation it makes sure that the data is always displayed right after it is sent.
 
 #ifndef APP_USBD_CDC_ACM_ZLP_ON_EPSIZE_WRITE
-#define APP_USBD_CDC_ACM_ZLP_ON_EPSIZE_WRITE 1
+#define APP_USBD_CDC_ACM_ZLP_ON_EPSIZE_WRITE 0
 #endif
 
 // </h> 
