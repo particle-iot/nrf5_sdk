@@ -94,38 +94,44 @@ enum {
 #define X(mnemonic, str_idx, ...) CONCAT_2(mnemonic, _ARRAY_POS),
     APP_USBD_STRINGS_USER
 #undef X
+
+    APP_USBD_STRING_DSC_CNT /**< Count of used string array positions (Particle patch) */
 };
 
 /**
- * @brief String index into internal array index conversion table.
+ * @brief Compact string index into internal array index mapping (Particle patch).
  *
- * The array that transforms the USB string indexes into internal array position.
- * @note Value 0 is used to mark non-existing string.
+ * The original sparse [APP_USBD_STRING_ID_CNT] table wasted flash when high
+ * USB string indexes were in use (0xEE for the MS OS descriptor).
  */
-static uint8_t const m_string_translation[APP_USBD_STRING_ID_CNT] =
-{
-    [APP_USBD_STRING_ID_LANGIDS] = APP_USBD_STRING_ID_LANGIDS_ARRAY_POS,
+typedef struct {
+    uint8_t usb_idx;    /* USB string index */
+    uint8_t array_pos;  /* Position in m_string_dsc */
+} app_usbd_string_map_t;
 
+static app_usbd_string_map_t const m_string_translation[] =
+{
 #if (APP_USBD_STRING_ID_MANUFACTURER != 0)
-    [APP_USBD_STRING_ID_MANUFACTURER] = APP_USBD_STRING_ID_MANUFACTURER_ARRAY_POS,
+    { APP_USBD_STRING_ID_MANUFACTURER, APP_USBD_STRING_ID_MANUFACTURER_ARRAY_POS },
 #endif // (APP_USBD_STRING_ID_MANUFACTURER != 0)
 
 #if (APP_USBD_STRING_ID_PRODUCT != 0)
-    [APP_USBD_STRING_ID_PRODUCT] = APP_USBD_STRING_ID_PRODUCT_ARRAY_POS,
+    { APP_USBD_STRING_ID_PRODUCT, APP_USBD_STRING_ID_PRODUCT_ARRAY_POS },
 #endif // (APP_USBD_STRING_ID_PRODUCT != 0)
 
 #if (APP_USBD_STRING_ID_SERIAL != 0)
-    [APP_USBD_STRING_ID_SERIAL] = APP_USBD_STRING_ID_SERIAL_ARRAY_POS,
+    { APP_USBD_STRING_ID_SERIAL, APP_USBD_STRING_ID_SERIAL_ARRAY_POS },
 #endif // (APP_USBD_STRING_ID_SERIAL != 0)
 
 #if (APP_USBD_STRING_ID_CONFIGURATION != 0)
-    [APP_USBD_STRING_ID_CONFIGURATION] = APP_USBD_STRING_ID_CONFIGURATION_ARRAY_POS,
+    { APP_USBD_STRING_ID_CONFIGURATION, APP_USBD_STRING_ID_CONFIGURATION_ARRAY_POS },
 #endif // (APP_USBD_STRING_ID_CONFIGURATION != 0)
 
-#define X(mnemonic, str_idx, ...) [mnemonic] = CONCAT_2(mnemonic, _ARRAY_POS),
+#define X(mnemonic, str_idx, ...) { mnemonic, CONCAT_2(mnemonic, _ARRAY_POS) },
     APP_USBD_STRINGS_USER
 #undef X
 };
+
 
 #ifndef APP_USBD_STRINGS_MANUFACTURER_EXTERN
 #define APP_USBD_STRINGS_MANUFACTURER_EXTERN 0
@@ -161,8 +167,12 @@ extern uint8_t APP_USBD_STRING_CONFIGURATION[];
 
 /**
  * @brief String descriptor table.
+ *
+ * Sized by APP_USBD_STRING_DSC_CNT (the count of used array positions from the
+ * ARRAY_POS enum above), not APP_USBD_STRING_ID_CNT, since the mapping from USB
+ * string indexes is handled by m_string_translation (Particle patch).
  * */
-static uint8_t const * m_string_dsc[APP_USBD_STRING_ID_CNT][ARRAY_SIZE(m_langids)] =
+static uint8_t const * m_string_dsc[APP_USBD_STRING_DSC_CNT][ARRAY_SIZE(m_langids)] =
 {
     [APP_USBD_STRING_ID_LANGIDS_ARRAY_POS] = {APP_USBD_STRING_RAW16_DESC(APP_USBD_STRINGS_LANGIDS)},
 
@@ -263,13 +273,16 @@ uint16_t const * app_usbd_string_desc_get(uint8_t idx, uint16_t langid)
         }
     }
 
-    /* Get the string index in array. */
-    if (idx >= ARRAY_SIZE(m_string_translation))
+    /* Get the string index in array (Particle patch: compact lookup). */
+    uint8_t str_pos = 0;
+    for (uint8_t i = 0; i < ARRAY_SIZE(m_string_translation); ++i)
     {
-        return NULL;
+        if (m_string_translation[i].usb_idx == idx)
+        {
+            str_pos = m_string_translation[i].array_pos;
+            break;
+        }
     }
-
-    uint8_t str_pos = m_string_translation[idx];
     if (str_pos == 0)
     {
         return NULL;
